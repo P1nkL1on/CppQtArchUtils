@@ -1,0 +1,18 @@
+#ifndef $FILE_GUARD
+#define $FILE_GUARD
+
+$HEADERS
+
+$SOURCES
+
+$NAMESPACE_START
+
+class $NAME
+{
+public:
+	$Name();
+};
+
+$NAMESPACE_END
+
+#endif // FILE_GUARD

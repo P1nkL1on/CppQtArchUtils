@@ -1,6 +1,16 @@
 # Prerequisites
 *.d
 
+# Build directories
+/build-*
+/build-*
+/_build
+/_static
+/_templates
+
+*.user
+*.autosave
+
 # Compiled Object files
 *.slo
 *.lo

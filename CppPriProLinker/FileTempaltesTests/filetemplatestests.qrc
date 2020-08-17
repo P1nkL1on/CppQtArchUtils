@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>empty.txt</file>
+        <file>multiline.txt</file>
+        <file>oneline.txt</file>
+    </qresource>
+</RCC>

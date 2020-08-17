@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>header_0.txt</file>
+        <file>pri_0.txt</file>
+        <file>pro_0.txt</file>
+        <file>source_0.txt</file>
+    </qresource>
+</RCC>
