@@ -39,14 +39,13 @@ void TemplateDecoder::replaceTemplate(FileData &data, const QHash<QString, FileD
         }
         data[i] = replaceData.first();
         for (int j = 1; j < replaceData.length(); ++j)
-            data.insert(i + j, data[j]);
+            data.insert(i + j, replaceData[j]);
         i += replaceData.length() - 1;
     }
 }
 
 void TemplateDecoder::replaceLists(FileData &data, const QHash<QString, QStringList> &variableToStringListHash)
 {
-
 }
 
 void TemplateDecoder::replaceVars(FileData &data, const QHash<QString, QString> &variableToStringHash)
