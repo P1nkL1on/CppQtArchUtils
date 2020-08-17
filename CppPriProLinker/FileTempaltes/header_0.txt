@@ -10,7 +10,7 @@ $NAMESPACE_START
 class $NAME
 {
 public:
-	$Name();
+\t$Name();
 };
 
 $NAMESPACE_END

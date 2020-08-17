@@ -9,13 +9,17 @@ SOURCES += \
     main.cpp \
     form.cpp \
     templateloader.cpp \
-    templateloader_tests.cpp
+    templateloader_tests.cpp \
+    templatedecoder.cpp \
+    templatedecoder_tests.cpp
 
 HEADERS += \
     form.h \
     templateloader.h \
     filedata.h \
-    templateloader_tests.h
+    templateloader_tests.h \
+    templatedecoder.h \
+    templatedecoder_tests.h
 
 RESOURCES += \
     FileTempaltes/filetemplates.qrc \
