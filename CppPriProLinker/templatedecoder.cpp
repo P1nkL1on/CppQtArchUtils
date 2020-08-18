@@ -77,7 +77,7 @@ void TemplateDecoder::replaceLists(FileData &data, const QHash<QString, QStringL
         int cycleLength = -1;
         for (const QString &variableNameInBuffer : variableNamesInBuffer){
             const int tmp = variableToStringListHash.value(variableNameInBuffer).length();
-            Q_ASSERT_X(tmp == cycleLength or cycleLength < 0, "TemplateDecoder::replaceLists",
+            Q_ASSERT_X((tmp == cycleLength) or (cycleLength < 0), "TemplateDecoder::replaceLists",
                        "Var lists inside one repeat cycle should contain same amount of values!");
             cycleLength = tmp;
         }

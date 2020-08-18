@@ -7,6 +7,7 @@ TemplateDecoder TemplateDecoderFactory::create(
         const QStringList &headerRelativePathes,
         const QStringList &sourceRelativePathes,
         const QStringList &resourceRelativePathes,
+        int tabSpaceCount,
         bool skipEmptyBlocks,
         int newLinesBetweenBlocks)
 {
@@ -14,16 +15,21 @@ TemplateDecoder TemplateDecoderFactory::create(
 
     // FILE BLOCKS
     const QHash<QString, QStringList> blockNameToFileNames = {
-        {"HEADERS", headerRelativePathes},
-        {"SOURCES", sourceRelativePathes},
-        {"RESOURCES", resourceRelativePathes}
+        {"HS", headerRelativePathes},
+        {"CPPS", sourceRelativePathes},
+        {"QRCS", resourceRelativePathes}
     };
-    const auto blockTemplate = [](const QString &name) -> QStringList {
-        return QString("%1 += \\ | $REPEAT | \t$%1_RELATIVE_PATHES$%1_LINE_SEPARATORS | $END")
-                .arg(name).split(" | ");
+    const QHash<QString, QString> blockNameToBlockKey = {
+        {"HS", "HEADERS"},
+        {"CPPS", "SOURCES"},
+        {"QRCS", "RESOURCES"}
+    };
+    const auto blockTemplate = [](const QString &title, const QString &name) -> QStringList {
+        return QString("%2 += \\ | $REPEAT | \t$%1_RELATIVE_PATHES$%1_LINE_SEPARATORS | $END")
+                .arg(name).arg(title).split(" | ");
     };
 
-    const auto addFileBlock = [&](const QString &blockName, const QStringList &blockFileRelativePathes){
+    const auto addFileBlock = [&](const QString &blockName, const QString &blockTitle, const QStringList &blockFileRelativePathes){
         if (blockFileRelativePathes.isEmpty() and skipEmptyBlocks){
             decoder.setVariableToTemplate("$" + blockName, QStringList());
             return;
@@ -32,16 +38,17 @@ TemplateDecoder TemplateDecoderFactory::create(
         QStringList lineSeparators;
         for (int i = 0; i < size; ++i, lineSeparators << (i < size ? " \\" : ""));
 
-        QStringList blockTemplate = blockTemplate(blockName);
-        for (int i = 0; i < newLinesBetweenBlocks; ++i) blockTemplate.insert(0, "");
-        decoder.setVariableToTemplate("$" + blockName, blockTemplate);
-        decoder.setVariableToStringList(QString("%1_RELATIVE_PATHES").arg(blockName), blockFileRelativePathes);
-        decoder.setVariableToStringList(QString("%1_LINE_SEPARATORS").arg(blockName), lineSeparators);
+        QStringList blockTemplateData = blockTemplate(blockTitle, blockName);
+        for (int i = 0; i < newLinesBetweenBlocks; ++i)
+            blockTemplateData.insert(0, "");
+        decoder.setVariableToTemplate("$" + blockName, blockTemplateData);
+        decoder.setVariableToStringList(QString("$%1_RELATIVE_PATHES").arg(blockName), blockFileRelativePathes);
+        decoder.setVariableToStringList(QString("$%1_LINE_SEPARATORS").arg(blockName), lineSeparators);
     };
 
     for (const QString &blockName : blockNameToFileNames.keys()){
         const QStringList blockFilePathes = blockNameToFileNames.value(blockName);
-        addFileBlock(blockName, blockFilePathes);
+        addFileBlock(blockName, blockNameToBlockKey.value(blockName), blockFilePathes);
     }
 
     // PRIS
@@ -55,6 +62,12 @@ TemplateDecoder TemplateDecoderFactory::create(
         decoder.setVariableToStringList("$PRI_RELATIVE_PATHES", priRelativePathes);
     };
     addPris(priRelativePathes);
+
+    // MISC OPTIONS
+    // todo move it to the inner method of decoder
+    // because now it can replaces tabs in the middle and end of line
+    // but only at the line start its is required
+    decoder.setVariableToString("\t", QString().leftJustified(tabSpaceCount, ' '));
 
     return decoder;
 }

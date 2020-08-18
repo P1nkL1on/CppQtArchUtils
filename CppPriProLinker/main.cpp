@@ -1,15 +1,15 @@
 #include "form.h"
 
-//#include <QApplication>
+#include <QApplication>
 
-//int main(int argc, char *argv[])
-//{
-//    QApplication a(argc, argv);
-//    Form w;
-//    w.show();
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
+    Form w;
+    w.show();
 
-//    return a.exec();
-//}
+    return a.exec();
+}
 
 
 //#include "templateloader_tests.h"
@@ -26,10 +26,3 @@
 //    QTest::qExec(&testsDecoder, argc, argv);
 //}
 
-#include "templatedecoderfactory.h"
-
-int main()
-{
-    TemplateDecoderFactory::create({"form.h", "templateloader.h", "okey.h"}, {}, {});
-    return 0;
-}

@@ -2,6 +2,10 @@
 #define FORM_H
 
 #include <QMainWindow>
+#include <QPlainTextEdit>
+
+#include "templateloader.h"
+#include "templatedecoderfactory.h"
 
 class Form : public QMainWindow
 {
@@ -10,6 +14,15 @@ class Form : public QMainWindow
 public:
     Form(QWidget *parent = 0);
     ~Form();
+protected slots:
+    void updatePreview();
+protected:
+    bool m_skipEmptyBlocks = false;
+    int m_newLinesBetweenBlocks = 0;
+    int m_tabToSpaceCount = 4;
+    TemplateLoader m_loader;
+    TemplateDecoder m_decoder;
+    QPlainTextEdit *m_textPreviewEdit = nullptr;
 };
 
 #endif // FORM_H

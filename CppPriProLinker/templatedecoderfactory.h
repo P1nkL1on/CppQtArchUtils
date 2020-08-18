@@ -11,6 +11,7 @@ public:
             const QStringList &headerRelativePathes,
             const QStringList &sourceRelativePathes,
             const QStringList &resourceRelativePathes,
+            int tabSpaceCount,
             bool skipEmptyBlocks,
             int newLinesBetweenBlocks);
 };
