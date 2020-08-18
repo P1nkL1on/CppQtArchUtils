@@ -1,17 +1,25 @@
 #include "templatedecoder.h"
 
-
 FileData TemplateDecoder::decode(const FileData &data) const
 {
-    // return decode(data, m_variableToTempalteHash, m_variableToStringHash);
+    FileData res = data;
+    replaceTemplate(res, m_variableToTempalteHash);
+    replaceLists(res, m_variableToStringListHash);
+    replaceVars(res, m_variableToStringHash);
+    return res;
 }
 
-void TemplateDecoder::addVariableToString(const QString &varName, const QString &stringValue)
+void TemplateDecoder::setVariableToString(const QString &varName, const QString &stringValue)
 {
     m_variableToStringHash.insert(varName, stringValue);
 }
 
-void TemplateDecoder::addVariableToTemplate(const QString &varName, const FileData &templateValue)
+void TemplateDecoder::setVariableToStringList(const QString &varName, const QStringList &stringListValue)
+{
+    m_variableToStringListHash.insert(varName, stringListValue);
+}
+
+void TemplateDecoder::setVariableToTemplate(const QString &varName, const FileData &templateValue)
 {
     m_variableToTempalteHash.insert(varName, templateValue);
 }
@@ -46,19 +54,6 @@ void TemplateDecoder::replaceTemplate(FileData &data, const QHash<QString, FileD
 
 void TemplateDecoder::replaceLists(FileData &data, const QHash<QString, QStringList> &variableToStringListHash)
 {
-    // $NAMESPACES {"a", "b", "c"}
-
-    // $REPEAT
-    // namespace $NAMESPACES {
-    // _
-    // $END
-
-    // namespace a {
-    // _
-    // namespace b {
-    // _
-    // namespace c {
-    // _
     int startLineInd = -1;
     int endLineInd = -1;
     bool isRepeatBackward = false;
@@ -77,12 +72,14 @@ void TemplateDecoder::replaceLists(FileData &data, const QHash<QString, QStringL
                         variableNamesInBuffer << variableName;
                 continue;
             }
+            Q_ASSER_X(not variableNamesInBuffer.isEmpty(), "TemplateDecoder::replaceLists",
+                      "No variables inside repeat cycle means no way to compute iterations count!");
             isInLineBuffer = false;
             endLineInd = i;
 
             const int oldBufferLength = endLineInd - startLineInd + 1;
             for (int j = 0; j < oldBufferLength; ++j)
-                data.removeAt(startLineInd + j);
+                data.removeAt(startLineInd);
 
             int cycleLength = -1;
             for (const QString &variableNameInBuffer : variableNamesInBuffer){

@@ -141,6 +141,73 @@ void TemplateDecoderTests::severalTemplateTest()
     QCOMPARE(data, expectedData);
 }
 
+void TemplateDecoderTests::listTest()
+{
+    FileData data {
+        "start",
+        "$REPEAT",
+        ".",
+        "$LIST",
+        "..",
+        "$END",
+        "end"
+    };
+    const QHash<QString, QStringList> varToListHash {
+        {"$LIST", {"value1", "value2"}},
+    };
+    TemplateDecoder::replaceLists(data, varToListHash);
+    const FileData expectedData {
+        "start",
+        ".",
+        "value1",
+        "..",
+        ".",
+        "value2",
+        "..",
+        "end"
+    };
+    QCOMPARE(data, expectedData);
+}
+
+void TemplateDecoderTests::listReversedTest()
+{
+    FileData data {
+        "$REPEAT_BACKWARD",
+        "/Folder/$LIST.png",
+        "$END"
+    };
+    const QHash<QString, QStringList> varToListHash {
+        {"$LIST", {"flower", "house", "cat"}}
+    };
+    TemplateDecoder::replaceLists(data, varToListHash);
+    const FileData expectedData {
+        "/Folder/cat.png",
+        "/Folder/house.png",
+        "/Folder/flower.png"
+    };
+    QCOMPARE(data, expectedData);
+}
+
+void TemplateDecoderTests::multiListTest()
+{
+    FileData data {
+        "$REPEAT",
+        "($ALIST + $BLIST),",
+        "$END"
+    };
+    const QHash<QString, QStringList> varToListHash {
+        {"$ALIST", {"1", "2", "3"}},
+        {"$BLIST", {"4", "5", "6"}},
+    };
+    TemplateDecoder::replaceLists(data, varToListHash);
+    const FileData expectedData {
+        "(1 + 4),",
+        "(2 + 5),",
+        "(3 + 6),"
+    };
+    QCOMPARE(data, expectedData);
+}
+
 void TemplateDecoderTests::templateToVarTest()
 {
     FileData data {

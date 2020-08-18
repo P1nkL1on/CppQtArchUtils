@@ -34,11 +34,12 @@ class TemplateDecoder
 public:
     TemplateDecoder() = default;
     FileData decode(const FileData &data) const;
-    void addVariableToString(const QString &varName, const QString &stringValue);
-    void addVariableToStringList(const QString &varName, const QStringList &stringListValue);
-    void addVariableToTemplate(const QString &varName, const FileData &templateValue);
+    void setVariableToString(const QString &varName, const QString &stringValue);
+    void setVariableToStringList(const QString &varName, const QStringList &stringListValue);
+    void setVariableToTemplate(const QString &varName, const FileData &templateValue);
 protected:
     QHash<QString, FileData> m_variableToTempalteHash;
+    QHash<QString, QStringList> m_variableToStringListHash;
     QHash<QString, QString> m_variableToStringHash;
     static FileData decode(
             const FileData &data,

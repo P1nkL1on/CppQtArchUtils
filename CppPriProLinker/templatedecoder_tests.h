@@ -18,6 +18,9 @@ private slots:
     void emptyTemplateTest();
     void multiTemplateTest();
     void severalTemplateTest();
+    void listTest();
+    void listReversedTest();
+    void multiListTest();
 
     void templateToVarTest();
 };
