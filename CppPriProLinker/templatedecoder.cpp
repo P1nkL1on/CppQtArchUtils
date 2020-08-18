@@ -2,11 +2,11 @@
 
 FileData TemplateDecoder::decode(const FileData &data) const
 {
-    FileData res = data;
-    replaceTemplate(res, m_variableToTempalteHash);
-    replaceLists(res, m_variableToStringListHash);
-    replaceVars(res, m_variableToStringHash);
-    return res;
+    return decode(
+        data,
+        m_variableToTempalteHash,
+        m_variableToStringListHash,
+        m_variableToStringHash);
 }
 
 void TemplateDecoder::setVariableToString(const QString &varName, const QString &stringValue)
@@ -30,6 +30,11 @@ FileData TemplateDecoder::decode(
         const QHash<QString, QStringList> &variableToStringListHash,
         const QHash<QString, QString> &variableToStringHash)
 {
+    FileData res = data;
+    replaceTemplate(res, variableToTempalteHash);
+    replaceLists(res, variableToStringListHash);
+    replaceVars(res, variableToStringHash);
+    return res;
 }
 
 void TemplateDecoder::replaceTemplate(FileData &data, const QHash<QString, FileData> &variableToTempalteHash)
@@ -61,6 +66,38 @@ void TemplateDecoder::replaceLists(FileData &data, const QHash<QString, QStringL
     QStringList linesBuffer;
     QStringList variableNamesInBuffer;
     const QStringList variableNames = variableToStringListHash.keys();
+
+    const auto replaceBuffer = [&]{
+        Q_ASSERT_X(not variableNamesInBuffer.isEmpty(), "TemplateDecoder::replaceLists",
+                  "No variables inside repeat cycle means no way to compute iterations count!");
+        const int oldBufferLength = endLineInd - startLineInd + 1;
+        for (int j = 0; j < oldBufferLength; ++j)
+            data.removeAt(startLineInd);
+
+        int cycleLength = -1;
+        for (const QString &variableNameInBuffer : variableNamesInBuffer){
+            const int tmp = variableToStringListHash.value(variableNameInBuffer).length();
+            Q_ASSERT_X(tmp == cycleLength or cycleLength < 0, "TemplateDecoder::replaceLists",
+                       "Var lists inside one repeat cycle should contain same amount of values!");
+            cycleLength = tmp;
+        }
+        int insertInd = startLineInd;
+        for (int cycleInd = 0; cycleInd < cycleLength; ++cycleInd){
+            for (const QString &bufferedLine : linesBuffer){
+                QString tmp = bufferedLine;
+                for (const QString &variableNameInBuffer : variableNamesInBuffer){
+                    const int valueInd = isRepeatBackward ? (cycleLength - 1 - cycleInd) : cycleInd;
+                    tmp.replace(variableNameInBuffer, variableToStringListHash
+                                .value(variableNameInBuffer).at(valueInd));
+                }
+                data.insert(insertInd, tmp);
+                ++insertInd;
+            }
+        }
+        const int newBufferLength = cycleLength * linesBuffer.length();
+        return newBufferLength - oldBufferLength;
+    };
+
     for (int i = 0; i < data.length(); ++i) {
         const QString line = data.at(i);
         const QString lineTrimmed = line.trimmed();
@@ -72,37 +109,15 @@ void TemplateDecoder::replaceLists(FileData &data, const QHash<QString, QStringL
                         variableNamesInBuffer << variableName;
                 continue;
             }
-            Q_ASSER_X(not variableNamesInBuffer.isEmpty(), "TemplateDecoder::replaceLists",
-                      "No variables inside repeat cycle means no way to compute iterations count!");
-            isInLineBuffer = false;
             endLineInd = i;
+            const int offset = replaceBuffer();
+            i += offset;
 
-            const int oldBufferLength = endLineInd - startLineInd + 1;
-            for (int j = 0; j < oldBufferLength; ++j)
-                data.removeAt(startLineInd);
-
-            int cycleLength = -1;
-            for (const QString &variableNameInBuffer : variableNamesInBuffer){
-                const int tmp = variableToStringListHash.value(variableNameInBuffer).length();
-                Q_ASSERT_X(tmp == cycleLength or cycleLength < 0, "TemplateDecoder::replaceLists",
-                           "Var lists inside one repeat cycle should contain same amount of values!");
-                cycleLength = tmp;
-            }
-            int insertInd = startLineInd;
-            for (int cycleInd = 0; cycleInd < cycleLength; ++cycleInd){
-                for (const QString &bufferedLine : linesBuffer){
-                    QString tmp = bufferedLine;
-                    for (const QString &variableNameInBuffer : variableNamesInBuffer){
-                        const int valueInd = isRepeatBackward ? (cycleLength - 1 - cycleInd) : cycleInd;
-                        tmp.replace(variableNameInBuffer, variableToStringListHash
-                                    .value(variableNameInBuffer).at(valueInd));
-                    }
-                    data.insert(insertInd, tmp);
-                    ++insertInd;
-                }
-            }
-            const int newBufferLength = cycleLength * linesBuffer.length();
-            i += newBufferLength - oldBufferLength;
+            startLineInd = -1;
+            endLineInd = -1;
+            isInLineBuffer = false;
+            linesBuffer.clear();
+            variableNamesInBuffer.clear();
             continue;
         }
         if (lineTrimmed.startsWith("$REPEAT")){

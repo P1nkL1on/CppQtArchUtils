@@ -208,6 +208,37 @@ void TemplateDecoderTests::multiListTest()
     QCOMPARE(data, expectedData);
 }
 
+void TemplateDecoderTests::severtalListTest()
+{
+    FileData data {
+        "$REPEAT",
+        "1. $LIST",
+        "$END",
+        "$REPEAT",
+        "2. $BIGLIST",
+        "$END",
+        "$REPEAT",
+        "3. $LIST",
+        "$END",
+    };
+    const QHash<QString, QStringList> varToListHash {
+        {"$LIST", {"a", "b"}},
+        {"$BIGLIST", {"c", "d", "e", "f"}},
+    };
+    TemplateDecoder::replaceLists(data, varToListHash);
+    const FileData expectedData {
+        "1. a",
+        "1. b",
+        "2. c",
+        "2. d",
+        "2. e",
+        "2. f",
+        "3. a",
+        "3. b"
+    };
+    QCOMPARE(data, expectedData);
+}
+
 void TemplateDecoderTests::templateToVarTest()
 {
     FileData data {
@@ -232,4 +263,46 @@ void TemplateDecoderTests::templateToVarTest()
         "}"
     };
     QCOMPARE(data, expectedData);
+}
+
+void TemplateDecoderTests::fullDecodeTest()
+{
+    const FileData data {
+        "$INC",
+        "$START",
+        "$CYCLE_START",
+        "$OP",
+        "$CYCLE_END",
+        "$END"
+    };
+    const QHash<QString, QString> varToStringHash {
+        {"$LETTER", "a"},
+        {"$INC", "#include <QtDebug>"},
+        {"$END", "// end"}
+    };
+    const QHash<QString, QStringList> varToListHash {
+        {"$ITERATOR", {"i", "j", "k"}},
+    };
+    const QHash<QString, QStringList> varToTemplateHash {
+        {"$START", {"$REPEAT_BACKWARD", "auto $ITERATOR = 0;", "$END"}},
+        {"$OP", {"qDebug() << '$LETTER';"}},
+        {"$CYCLE_START", {"$REPEAT", "for ($ITERATOR = -1; $ITERATOR < 10; ++$ITERATOR) {", "$END"}},
+        {"$CYCLE_END", {"$REPEAT_BACKWARD", "} // for $ITERATOR", "$END"}}
+    };
+    const FileData actualData = TemplateDecoder::decode(data, varToTemplateHash, varToListHash, varToStringHash);
+    const FileData expectedData {
+        "#include <QtDebug>",
+        "auto k = 0;",
+        "auto j = 0;",
+        "auto i = 0;",
+        "for (i = -1; i < 10; ++i) {",
+        "for (j = -1; j < 10; ++j) {",
+        "for (k = -1; k < 10; ++k) {",
+        "qDebug() << 'a';",
+        "} // for k",
+        "} // for j",
+        "} // for i",
+        "// end"
+    };
+    QCOMPARE(actualData, expectedData);
 }

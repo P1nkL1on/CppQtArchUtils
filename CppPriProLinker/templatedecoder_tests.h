@@ -21,8 +21,10 @@ private slots:
     void listTest();
     void listReversedTest();
     void multiListTest();
+    void severtalListTest();
 
     void templateToVarTest();
+    void fullDecodeTest();
 };
 
 #endif // TEMPLATEDECODERTESTS_H
