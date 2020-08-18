@@ -37,7 +37,7 @@ Form::Form(QWidget *parent)
     m_textPreviewEdit->setFont(QFont("Courier New", 10));
 
     auto editor = new StringListEdit;
-    editor->addItems({"a", "b", "c"});
+    editor->addItems({"abcdefgh", "ghjlqwepoqwi123456", "13579", "00000000", "asdasdsad1220", "aasss0oooo0", "0", "FUU00UCK"});
     hLayout->addWidget(editor);
 
     setCentralWidget(centralWidget);

@@ -5,6 +5,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QPushButton>
+#include <QCheckBox>
 #include <QBoxLayout>
 #include <QFrame>
 
@@ -22,6 +23,7 @@ protected:
     QLineEdit *m_textEdit = nullptr;
     QPushButton *m_addButton = nullptr;
     QPushButton *m_removeButton = nullptr;
+    QCheckBox *m_caseSensetiveEdit = nullptr;
     QListWidget *m_listView = nullptr;
     QFrame *m_editFrame = nullptr;
     QFrame *m_searchFrame = nullptr;
@@ -29,6 +31,14 @@ protected:
     QStringList m_items;
 
     void setMode(Mode mode);
+    static void sortOptionsByScore(
+            const QString &searchingFor,
+            bool caseSensetive,
+            QStringList &optionList,
+            QHash<QString, bool> &hasAnyScore);
+    static int optionScore(
+            const QString &searchingFor,
+            const QString &option);
 };
 
 #endif // STRINGLISTEDIT_H

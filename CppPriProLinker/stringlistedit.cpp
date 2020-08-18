@@ -1,5 +1,7 @@
 #include "stringlistedit.h"
-
+#include <algorithm>
+#include <QStringList>
+#include <QtDebug>
 
 StringListEdit::StringListEdit(QWidget *parent) : QWidget(parent)
 {
@@ -30,6 +32,10 @@ StringListEdit::StringListEdit(QWidget *parent) : QWidget(parent)
     m_searchFrame->setLayout(searchLayout);
     toolsLayout->addWidget(m_searchFrame, 1);
 
+    m_caseSensetiveEdit = new QCheckBox("Case Sensetive");
+    searchLayout->addWidget(m_caseSensetiveEdit);
+
+
     m_modeEdit = new QComboBox;
     m_modeEdit->addItems({"Search", "Edit"});
     toolsLayout->addWidget(m_modeEdit);
@@ -41,6 +47,12 @@ StringListEdit::StringListEdit(QWidget *parent) : QWidget(parent)
     layout->addWidget(m_listView, 1);
 
     setMode(Mode::Search);
+
+    connect(m_textEdit, &QLineEdit::textChanged, this, &StringListEdit::updateListAccordingToLineEdit);
+    connect(m_caseSensetiveEdit, &QCheckBox::toggled, this, &StringListEdit::updateListAccordingToLineEdit);
+    connect(m_listView, &QListWidget::itemClicked, this, [](QListWidgetItem *){
+        // clicked
+    });
 }
 
 void StringListEdit::addItems(const QStringList &items)
@@ -52,7 +64,23 @@ void StringListEdit::addItems(const QStringList &items)
 void StringListEdit::updateListAccordingToLineEdit()
 {
     m_listView->clear();
-    m_listView->addItems(m_items);
+    if (m_textEdit->text().isEmpty()){
+        m_listView->addItems(m_items);
+        return;
+    }
+
+    QStringList sortedItems = m_items;
+    QHash<QString, bool> hasAnyScore;
+    sortOptionsByScore(
+                m_textEdit->text(),
+                m_caseSensetiveEdit->isChecked(),
+                sortedItems,
+                hasAnyScore);
+    QStringList shownItems;
+    for (const QString &item : sortedItems)
+        if (hasAnyScore.value(item, false))
+            shownItems << item;
+    m_listView->addItems(shownItems);
 }
 
 void StringListEdit::setMode(StringListEdit::Mode mode)
@@ -62,4 +90,42 @@ void StringListEdit::setMode(StringListEdit::Mode mode)
         return;
     m_searchFrame->setVisible(mode == Mode::Search);
     m_editFrame->setVisible(mode == Mode::Edit);
+}
+
+void StringListEdit::sortOptionsByScore(
+        const QString &searchingFor,
+        bool caseSensetive,
+        QStringList &optionList,
+        QHash<QString, bool> &hasAnyScore)
+{
+    const auto score = [&](const QString &s){
+        const int score = optionScore(caseSensetive ? searchingFor : searchingFor.toLower(), caseSensetive ? s : s.toLower());
+        hasAnyScore.insert(s, score > std::numeric_limits<int>::min());
+        return score;
+    };
+    std::sort(optionList.begin(), optionList.end(), [score](const QString &a, const QString &b) {
+        return score(a) > score(b);
+    });
+}
+
+int StringListEdit::optionScore( const QString &searchingFor, const QString &value)
+{
+    int score = 0;
+    int valueInd = 0;
+    int searchingForInd = 0;
+
+    while (searchingForInd < searchingFor.size()){
+        const auto searchForCharacter = searchingFor[searchingForInd];
+        int distance = 0;
+        while (valueInd < value.size() and value[valueInd] != searchForCharacter){
+            ++valueInd;
+            ++distance;
+        }
+        if (valueInd >= value.size())
+            return std::numeric_limits<int>::min();
+        ++searchingForInd;
+        ++valueInd;
+        score -= distance;
+    }
+    return score;
 }
