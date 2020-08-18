@@ -1,4 +1,4 @@
-#include "$FILE_NAME_H"
+#include "$HEADER_FILE_NAME"
 
 $NAMESPACE_USING
 

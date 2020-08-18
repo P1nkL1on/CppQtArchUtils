@@ -1,5 +1,6 @@
 #include "form.h"
-#include <QApplication>
+
+//#include <QApplication>
 
 //int main(int argc, char *argv[])
 //{
@@ -11,16 +12,24 @@
 //}
 
 
-#include "templateloader_tests.h"
-#include "templatedecoder_tests.h"
+//#include "templateloader_tests.h"
+//#include "templatedecoder_tests.h"
 
-#include <QTest>
+//#include <QTest>
 
-int main(int argc, char *argv[])
+//int main(int argc, char *argv[])
+//{
+//    TemplateLoaderTests testsLoader;
+//    QTest::qExec(&testsLoader, argc, argv);
+
+//    TemplateDecoderTests testsDecoder;
+//    QTest::qExec(&testsDecoder, argc, argv);
+//}
+
+#include "templatedecoderfactory.h"
+
+int main()
 {
-    TemplateLoaderTests testsLoader;
-    QTest::qExec(&testsLoader, argc, argv);
-
-    TemplateDecoderTests testsDecoder;
-    QTest::qExec(&testsDecoder, argc, argv);
+    TemplateDecoderFactory::create({"form.h", "templateloader.h", "okey.h"}, {}, {});
+    return 0;
 }

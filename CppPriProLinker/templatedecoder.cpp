@@ -81,6 +81,7 @@ void TemplateDecoder::replaceLists(FileData &data, const QHash<QString, QStringL
                        "Var lists inside one repeat cycle should contain same amount of values!");
             cycleLength = tmp;
         }
+
         int insertInd = startLineInd;
         for (int cycleInd = 0; cycleInd < cycleLength; ++cycleInd){
             for (const QString &bufferedLine : linesBuffer){

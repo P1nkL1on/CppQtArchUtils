@@ -11,7 +11,8 @@ SOURCES += \
     templateloader.cpp \
     templateloader_tests.cpp \
     templatedecoder.cpp \
-    templatedecoder_tests.cpp
+    templatedecoder_tests.cpp \
+    templatedecoderfactory.cpp
 
 HEADERS += \
     form.h \
@@ -19,7 +20,8 @@ HEADERS += \
     filedata.h \
     templateloader_tests.h \
     templatedecoder.h \
-    templatedecoder_tests.h
+    templatedecoder_tests.h \
+    templatedecoderfactory.h
 
 RESOURCES += \
     FileTempaltes/filetemplates.qrc \
