@@ -13,7 +13,8 @@ SOURCES += \
     templateloader_tests.cpp \
     templatedecoder.cpp \
     templatedecoder_tests.cpp \
-    templatedecoderfactory.cpp
+    templatedecoderfactory.cpp \
+    stringlistedit.cpp
 
 HEADERS += \
     form.h \
@@ -22,7 +23,8 @@ HEADERS += \
     templateloader_tests.h \
     templatedecoder.h \
     templatedecoder_tests.h \
-    templatedecoderfactory.h
+    templatedecoderfactory.h \
+    stringlistedit.h
 
 RESOURCES += \
     FileTempaltes/filetemplates.qrc \

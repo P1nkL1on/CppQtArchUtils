@@ -9,7 +9,9 @@ TemplateDecoder TemplateDecoderFactory::create(
         const QStringList &resourceRelativePathes,
         int tabSpaceCount,
         bool skipEmptyBlocks,
-        int newLinesBetweenBlocks)
+        int newLinesBetweenBlocks,
+        bool usePriPWD,
+        bool useCppPWD)
 {
     TemplateDecoder decoder;
 
@@ -24,23 +26,26 @@ TemplateDecoder TemplateDecoderFactory::create(
         {"CPPS", "SOURCES"},
         {"QRCS", "RESOURCES"}
     };
-    const auto blockTemplate = [](const QString &title, const QString &name) -> QStringList {
-        return QString("%2 += \\ | $REPEAT | \t$%1_RELATIVE_PATHES$%1_LINE_SEPARATORS | $END")
-                .arg(name).arg(title).split(" | ");
-    };
 
     const auto addFileBlock = [&](const QString &blockName, const QString &blockTitle, const QStringList &blockFileRelativePathes){
         if (blockFileRelativePathes.isEmpty() and skipEmptyBlocks){
             decoder.setVariableToTemplate("$" + blockName, QStringList());
             return;
         }
+        const QString pwdStr = useCppPWD ? "$$PWD/" : "";
+        QStringList blockTemplateData {
+            QString("%1 += \\").arg(blockTitle),
+            "$REPEAT",
+            QString("\t%2$%1_RELATIVE_PATHES$%1_LINE_SEPARATORS")
+                    .arg(blockName).arg(pwdStr),
+            "$END"
+        };
+        for (int i = 0; i < newLinesBetweenBlocks; ++i)
+            blockTemplateData.insert(0, "");
         const int size = blockFileRelativePathes.length();
         QStringList lineSeparators;
         for (int i = 0; i < size; ++i, lineSeparators << (i < size ? " \\" : ""));
 
-        QStringList blockTemplateData = blockTemplate(blockTitle, blockName);
-        for (int i = 0; i < newLinesBetweenBlocks; ++i)
-            blockTemplateData.insert(0, "");
         decoder.setVariableToTemplate("$" + blockName, blockTemplateData);
         decoder.setVariableToStringList(QString("$%1_RELATIVE_PATHES").arg(blockName), blockFileRelativePathes);
         decoder.setVariableToStringList(QString("$%1_LINE_SEPARATORS").arg(blockName), lineSeparators);
@@ -53,11 +58,18 @@ TemplateDecoder TemplateDecoderFactory::create(
 
     // PRIS
     const auto addPris = [&](const QStringList &priRelativePathes){
-        const QStringList priTemplate {
+        if (priRelativePathes.isEmpty() and skipEmptyBlocks){
+            decoder.setVariableToTemplate("$PRIS", QStringList());
+            return;
+        }
+        const QString pwdStr = usePriPWD ? "$$PWD/" : "";
+        QStringList priTemplate {
             "$REPEAT",
-            "include($PRI_RELATIVE_PATHES)",
+            QString("include(%1$PRI_RELATIVE_PATHES)").arg(pwdStr),
             "$END"
         };
+        for (int i = 0; i < newLinesBetweenBlocks; ++i)
+            priTemplate.insert(0, "");
         decoder.setVariableToTemplate("$PRIS", priTemplate);
         decoder.setVariableToStringList("$PRI_RELATIVE_PATHES", priRelativePathes);
     };

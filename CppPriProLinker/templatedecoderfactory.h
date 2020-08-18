@@ -11,9 +11,11 @@ public:
             const QStringList &headerRelativePathes,
             const QStringList &sourceRelativePathes,
             const QStringList &resourceRelativePathes,
-            int tabSpaceCount,
-            bool skipEmptyBlocks,
-            int newLinesBetweenBlocks);
+            int tabSpaceCount = 4,
+            bool skipEmptyBlocks = true,
+            int newLinesBetweenBlocks = 1,
+            bool usePriPWD = true,
+            bool useCppPWD = false);
 };
 
 #endif // CPPTEMPLATEDECODERFACTORY_H
