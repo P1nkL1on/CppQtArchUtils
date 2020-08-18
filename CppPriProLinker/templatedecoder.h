@@ -16,8 +16,8 @@
 
 // QStringList {
 // $REPEAT
-// $namespace $NAMESPACES {
-// $_
+// namespace $NAMESPACES {
+// _
 // $END
 // }
 //

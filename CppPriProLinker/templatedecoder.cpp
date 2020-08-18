@@ -46,6 +46,75 @@ void TemplateDecoder::replaceTemplate(FileData &data, const QHash<QString, FileD
 
 void TemplateDecoder::replaceLists(FileData &data, const QHash<QString, QStringList> &variableToStringListHash)
 {
+    // $NAMESPACES {"a", "b", "c"}
+
+    // $REPEAT
+    // namespace $NAMESPACES {
+    // _
+    // $END
+
+    // namespace a {
+    // _
+    // namespace b {
+    // _
+    // namespace c {
+    // _
+    int startLineInd = -1;
+    int endLineInd = -1;
+    bool isRepeatBackward = false;
+    bool isInLineBuffer = false;
+    QStringList linesBuffer;
+    QStringList variableNamesInBuffer;
+    const QStringList variableNames = variableToStringListHash.keys();
+    for (int i = 0; i < data.length(); ++i) {
+        const QString line = data.at(i);
+        const QString lineTrimmed = line.trimmed();
+        if (isInLineBuffer){
+            if (lineTrimmed != "$END"){
+                linesBuffer << line;
+                for (const QString &variableName : variableNames)
+                    if (line.contains(variableName) and not variableNamesInBuffer.contains(variableName))
+                        variableNamesInBuffer << variableName;
+                continue;
+            }
+            isInLineBuffer = false;
+            endLineInd = i;
+
+            const int oldBufferLength = endLineInd - startLineInd + 1;
+            for (int j = 0; j < oldBufferLength; ++j)
+                data.removeAt(startLineInd + j);
+
+            int cycleLength = -1;
+            for (const QString &variableNameInBuffer : variableNamesInBuffer){
+                const int tmp = variableToStringListHash.value(variableNameInBuffer).length();
+                Q_ASSERT_X(tmp == cycleLength or cycleLength < 0, "TemplateDecoder::replaceLists",
+                           "Var lists inside one repeat cycle should contain same amount of values!");
+                cycleLength = tmp;
+            }
+            int insertInd = startLineInd;
+            for (int cycleInd = 0; cycleInd < cycleLength; ++cycleInd){
+                for (const QString &bufferedLine : linesBuffer){
+                    QString tmp = bufferedLine;
+                    for (const QString &variableNameInBuffer : variableNamesInBuffer){
+                        const int valueInd = isRepeatBackward ? (cycleLength - 1 - cycleInd) : cycleInd;
+                        tmp.replace(variableNameInBuffer, variableToStringListHash
+                                    .value(variableNameInBuffer).at(valueInd));
+                    }
+                    data.insert(insertInd, tmp);
+                    ++insertInd;
+                }
+            }
+            const int newBufferLength = cycleLength * linesBuffer.length();
+            i += newBufferLength - oldBufferLength;
+            continue;
+        }
+        if (lineTrimmed.startsWith("$REPEAT")){
+            isInLineBuffer = true;
+            isRepeatBackward = lineTrimmed == "$REPEAT_BACKWARD";
+            startLineInd = i;
+            continue;
+        }
+    }
 }
 
 void TemplateDecoder::replaceVars(FileData &data, const QHash<QString, QString> &variableToStringHash)
