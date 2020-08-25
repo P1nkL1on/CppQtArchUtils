@@ -11,11 +11,13 @@ public:
             const QString &filePath,
             FileData &data,
             QString &errMessage);
+
     static void parseHeader(
             const FileData &data,
-            QString &guard,
             QVector<FileLink> &links,
-            QStringList &classes);
+            QStringList &classes,
+            QString &guard);
+
     static void parsePri(
             const FileData &data,
             QVector<FileLink> &links);

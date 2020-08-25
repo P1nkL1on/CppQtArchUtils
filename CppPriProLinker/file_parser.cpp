@@ -29,21 +29,25 @@ bool FileParser::readFileData(
 
 void FileParser::parseHeader(
         const FileData &data,
-        QString &guard,
         QVector<FileLink> &links,
-        QStringList &classes)
+        QStringList &classes,
+        QString &guard)
 {
-    for (const QString &line : data){
-        const QString lineTrimmed = line.trimmed();
-        if (lineTrimmed.startsWith("#include"))
-            links << FileLink(lineTrimmed.split(' ', QString::SkipEmptyParts).last());
-        if (lineTrimmed.startsWith("#ifndef"))
-            guard = lineTrimmed.split(' ', QString::SkipEmptyParts).last();
-        if (lineTrimmed.startsWith("class ") or lineTrimmed.contains(" class ")){
-            const QStringList tokens = lineTrimmed.split(' ', QString::SkipEmptyParts);
-            classes << tokens.at(tokens.indexOf("class") + 1);
-        }
-    }
+    for (const QString &line : data)
+        if (line.startsWith("#include"))
+            links << FileLink(line.trimmed().split(' ', QString::SkipEmptyParts).last());
+
+//    for (const QString &line : data){
+//        const QString lineTrimmed = line.trimmed();
+//        if (lineTrimmed.startsWith("#include"))
+//            links << FileLink(lineTrimmed.split(' ', QString::SkipEmptyParts).last());
+//        if (lineTrimmed.startsWith("#ifndef"))
+//            guard = lineTrimmed.split(' ', QString::SkipEmptyParts).last();
+//        if (lineTrimmed.startsWith("class ") or lineTrimmed.contains(" class ")){
+//            const QStringList tokens = lineTrimmed.split(' ', QString::SkipEmptyParts);
+//            classes << tokens.at(tokens.indexOf("class") + 1);
+//        }
+//    }
 }
 
 void FileParser::parsePri(

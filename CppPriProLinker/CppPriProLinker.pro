@@ -20,7 +20,8 @@ SOURCES += \
     file.cpp \
     file_link.cpp \
     file_parser.cpp \
-    form2.cpp
+    form2.cpp \
+    file_tokenizer.cpp
 
 HEADERS += \
     form.h \
@@ -36,7 +37,8 @@ HEADERS += \
     file_link.h \
     file_data.h \
     file_parser.h \
-    form2.h
+    form2.h \
+    file_tokenizer.h
 
 RESOURCES += \
     FileTempaltes/filetemplates.qrc \

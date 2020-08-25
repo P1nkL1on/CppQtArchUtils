@@ -3,6 +3,7 @@
 #include <QVBoxLayout>
 #include <QDirIterator>
 #include "file_parser.h"
+#include "file_tokenizer.h"
 
 Form2::Form2(QWidget *parent) :
     QMainWindow(parent)
@@ -19,14 +20,31 @@ Form2::Form2(QWidget *parent) :
     layout->addWidget(m_resultText = new QPlainTextEdit, 1);
     m_resultText->setReadOnly(true);
 
+    layout->addWidget(m_tokenText = new QPlainTextEdit, 1);
+    m_tokenText->setReadOnly(true);
+
     QDirIterator dirIterator(
-                "D:",
+                "D:\\R3DS\\Prohor",
                 QStringList{"*.h"},
                 QDir::Files,
                 QDirIterator::Subdirectories);
     QStringList filePathes;
     while (dirIterator.hasNext())
         filePathes << dirIterator.next();
+
+
+    const QStringList tokenNames {
+        "Comment",
+        "Qoute",
+        "Char",
+        "Directive",
+        "Open Curly",
+        "Close Curly",
+        "Key Word",
+        "Name",
+        "Number",
+        "White Space"
+    };
 
     m_filesList->addItems(filePathes);
     connect(m_filesList, &QListWidget::itemPressed, this, [=](QListWidgetItem *item){
@@ -42,15 +60,23 @@ Form2::Form2(QWidget *parent) :
         QString guard;
         QVector<FileLink> links;
         QStringList classes;
-        FileParser::parseHeader(data, guard, links, classes);
+        FileParser::parseHeader(data, links, classes, guard);
 
-        m_fileText->setPlainText(data.join("\n"));
+        QString text;
+        m_fileText->setPlainText(text = data.join("\n"));
 
+        QVector<Token> tokens = FileTokenizer::tokenize(text);
+        QString tokensStr;
+        for (const Token &token : tokens)
+            tokensStr += QString("%1:  %2\n")
+                    .arg(tokenNames.at(token.type))
+                    .arg(token.text);
         QString linksStr;
         for (const FileLink &link : links)
             linksStr += QString("    %1\n").arg(link.includePath());
         m_resultText->setPlainText(QString("Guard: '%1'\n\nLinks:\n%2\nClasses:\n    %3")
                                    .arg(guard).arg(linksStr).arg(classes.join("\n    ")));
+        m_tokenText->setPlainText(tokensStr);
     });
 
     setCentralWidget(centralWidget);

@@ -16,6 +16,7 @@ protected:
     QListWidget *m_filesList = nullptr;
     QPlainTextEdit *m_fileText = nullptr;
     QPlainTextEdit *m_resultText = nullptr;
+    QPlainTextEdit *m_tokenText = nullptr;
 };
 
 #endif // FORM2_H

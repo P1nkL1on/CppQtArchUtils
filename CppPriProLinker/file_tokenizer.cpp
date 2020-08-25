@@ -1,0 +1,37 @@
+#include "file_tokenizer.h"
+
+#include <QRegExp>
+#include <QMap>
+#include <QtDebug>
+
+QVector<Token> FileTokenizer::tokenize(const QString &text)
+{
+    QMap<TokenType, QRegExp> regs {
+        {Directive, QRegExp("#(\\S*)")},
+        {Qoute, QRegExp("\"([^\"\\n]|\\\\\")*\"?")},
+        {Char, QRegExp("\'(\\\\?[^\'\\n]|\\\\\')\'?")},
+        {WhiteSpace, QRegExp("(\\s+)")}
+    };
+
+    int currentInd = 0;
+
+    QVector<Token> res;
+    while (currentInd < text.size()){
+        int capturedInd = -1;
+        TokenType foundType = None;
+        for (const QRegExp &reg : regs){
+            capturedInd = reg.indexIn(text, currentInd);
+            if (capturedInd == currentInd){
+                foundType = regs.key(reg);
+                const int length = reg.matchedLength();
+                const QString tokenText = text.mid(currentInd, length);
+                currentInd += length;
+                res << Token(foundType, tokenText);
+                break;
+            }
+        }
+        if (foundType == None)
+            break;
+    }
+    return res;
+}
