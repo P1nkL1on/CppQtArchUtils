@@ -36,9 +36,21 @@ QVector<Token> FileTokenizer::tokenize(const QString &text) const
 void FileTokenizer::parse(const QString &text, QStringList &includes, QStringList &namespaces, QStringList &classes, QString &guard) const
 {
     const QVector<Token> tokens = tokenize(text, m_tokenRegExpPatterns, m_skipRegExpPattern,
-        {AreaComment, LineComment, Qoute, Char, BlockOpen, BlockClose});
+        {AreaComment, LineComment, Qoute, Char});
     const QRegExp spaceRegExp("(\\s|\\{)+");
+    QStringList currentNamespaces;
+    int currentBlockDepth = 0;
     for (const Token &token : tokens){
+        if (token.type == BlockOpen){
+            ++currentBlockDepth;
+            continue;
+        }
+        if (token.type == BlockClose){
+            if (currentBlockDepth < currentNamespaces.length())
+                currentNamespaces.removeLast();;
+            --currentBlockDepth;
+            continue;
+        }
         const QStringList splitedToken = token.text.trimmed()
                 .split(spaceRegExp, QString::SkipEmptyParts);
         const QString value = splitedToken[1];
@@ -48,10 +60,13 @@ void FileTokenizer::parse(const QString &text, QStringList &includes, QStringLis
             else if (guard.isEmpty() and splitedToken.first() == "#ifndef")
                 guard = value;
         } else if (token.type == StructBlockOpen){
-            if (splitedToken.first() == "namespace")
+            currentNamespaces << value;
+            ++currentBlockDepth;
+            if (splitedToken.first() == "namespace"){
                 namespaces << value;
-            else
-                classes << value;
+            } else {
+                classes << currentNamespaces.join("::");
+            }
         }
     }
 }
