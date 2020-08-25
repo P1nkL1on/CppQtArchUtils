@@ -14,6 +14,7 @@ enum TokenType
     OpenCurly,
     CloseCurly,
     Block,
+    Code
 };
 
 struct Token

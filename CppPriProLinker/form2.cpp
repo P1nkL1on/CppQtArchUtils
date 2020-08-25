@@ -24,7 +24,7 @@ Form2::Form2(QWidget *parent) :
     m_tokenText->setReadOnly(true);
 
     QDirIterator dirIterator(
-                "D:\\R3DS\\Prohor",
+                "D:\\Prohor",
                 QStringList{"*.h"},
                 QDir::Files,
                 QDirIterator::Subdirectories);

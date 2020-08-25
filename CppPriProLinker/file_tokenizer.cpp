@@ -6,15 +6,18 @@
 
 QVector<Token> FileTokenizer::tokenize(const QString &text)
 {
-    QMap<TokenType, QRegExp> regs {
+    const QMap<TokenType, QRegExp> regs {
         {AreaComment, QRegExp("\\/\\*([^*]|\\*(?!\\/))*\\*\\/")},
         {LineComment, QRegExp("\\/\\/[^\n]*")},
-        {Directive, QRegExp("#(\\S*)(\\s+)((<([^>]*)>|\"([^\"]*)\")|([^\\s+]*))")},
+        {Directive, QRegExp("#(\\S*)(\\s+)((<([^>]*)>|"
+                            "\"([^\"]*)\")|([^\\s+]*))")},
         {Qoute, QRegExp("\"([^\"\\n]|\\\\\")*\"?")},
         {Char, QRegExp("\'(\\\\?[^\'\\n]|\\\\\')\'?")},
         {OpenCurly, QRegExp("\\{")},
         {CloseCurly, QRegExp("\\}")},
-        {Block, QRegExp("(class|struct|namespace)(\\s+)([a-zA-Z_$][a-zA-Z_$0-9]*)(\\s*)\\{")},
+        {Block, QRegExp("(class|struct|namespace)"
+                        "(\\s+)([a-zA-Z_$][a-zA-Z_$0-9]*)"
+                        "(\\s*)(:[^\\{]*)?\\{")},
     };
 
     int currentInd = 0;
@@ -34,9 +37,10 @@ QVector<Token> FileTokenizer::tokenize(const QString &text)
                 break;
             }
         }
-        if (foundType == None)
-//            break;
-            ++currentInd;
+        if (foundType == None){
+            const int jumpToInd = text.indexOf(QRegExp("(class|struct|namespace)|(\\/\\/)|(\\/\\*)|#|\"|\'|\\{|\\}"), currentInd + 1);
+            currentInd = jumpToInd >= 0 ? jumpToInd : (text.size());
+        }
     }
     return res;
 }
