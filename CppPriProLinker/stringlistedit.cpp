@@ -1,6 +1,10 @@
 #include "stringlistedit.h"
+
 #include <algorithm>
+
 #include <QStringList>
+#include <QKeyEvent>
+#include <QWheelEvent>
 #include <QtDebug>
 
 StringListEdit::StringListEdit(QWidget *parent) : QWidget(parent)
@@ -50,8 +54,8 @@ StringListEdit::StringListEdit(QWidget *parent) : QWidget(parent)
 
     connect(m_textEdit, &QLineEdit::textChanged, this, &StringListEdit::updateListAccordingToLineEdit);
     connect(m_caseSensetiveEdit, &QCheckBox::toggled, this, &StringListEdit::updateListAccordingToLineEdit);
-    connect(m_listView, &QListWidget::itemClicked, this, [](QListWidgetItem *){
-        // clicked
+    connect(m_listView, &QListWidget::itemPressed, this, [this](QListWidgetItem * item){
+        select(item->text());
     });
 }
 
@@ -61,11 +65,44 @@ void StringListEdit::addItems(const QStringList &items)
     updateListAccordingToLineEdit();
 }
 
+void StringListEdit::selectWithOffset(int offset)
+{
+    if (m_shownItemsCache.isEmpty())
+        return;
+    const int currentInd = m_shownItemsCache.indexOf(m_selected);
+    const int newInd = qBound(0, currentInd + offset, m_shownItemsCache.size() - 1);
+    qDebug() << currentInd << "->" << newInd;
+    select(m_shownItemsCache.at(newInd));
+}
+
+void StringListEdit::select(const QString &item)
+{
+    if (m_items.isEmpty())
+        return;
+    if (not m_items.contains(item))
+        return;
+    m_selected = item;
+    updateSelectedView();
+}
+
+void StringListEdit::selectNext()
+{
+    selectWithOffset(1);
+}
+
+void StringListEdit::selectPrev()
+{
+    selectWithOffset(-1);
+}
+
 void StringListEdit::updateListAccordingToLineEdit()
 {
     m_listView->clear();
+    m_lastSelectedItem = nullptr;
     if (m_textEdit->text().isEmpty()){
         m_listView->addItems(m_items);
+        m_shownItemsCache = m_items;
+        updateSelectedView();
         return;
     }
 
@@ -76,11 +113,69 @@ void StringListEdit::updateListAccordingToLineEdit()
                 m_caseSensetiveEdit->isChecked(),
                 sortedItems,
                 hasAnyScore);
-    QStringList shownItems;
+    m_shownItemsCache.clear();
     for (const QString &item : sortedItems)
         if (hasAnyScore.value(item, false))
-            shownItems << item;
-    m_listView->addItems(shownItems);
+            m_shownItemsCache << item;
+    m_listView->addItems(m_shownItemsCache);
+
+    const int shownCount = m_shownItemsCache.size();
+    const int totalCount = m_items.size();
+    if (shownCount < totalCount){
+        QListWidgetItem *lastItem = new QListWidgetItem;
+        lastItem->setFlags(Qt::NoItemFlags);
+        lastItem->setText(QString("and %1 other item(s)").arg(totalCount - shownCount));
+        lastItem->setForeground(QBrush(Qt::gray));
+        m_listView->addItem(lastItem);
+    }
+    updateSelectedView();
+}
+
+void StringListEdit::updateSelectedView()
+{
+    if (m_lastSelectedItem)
+        m_lastSelectedItem->setBackgroundColor(Qt::white);
+
+    const int selectedInd = m_shownItemsCache.indexOf(m_selected);
+    if (selectedInd < 0){
+        m_lastSelectedItem = nullptr;
+        return;
+    }
+    m_lastSelectedItem = m_listView->item(selectedInd);
+    if (not m_lastSelectedItem)
+        return;
+    m_lastSelectedItem->setBackgroundColor(Qt::yellow);
+    m_listView->scrollToItem(m_lastSelectedItem);
+}
+
+void StringListEdit::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_Down){
+        selectNext();
+        e->accept();
+        return;
+    }
+    if (e->key() == Qt::Key_Up){
+        selectPrev();
+        e->accept();
+        return;
+    }
+    QWidget::keyPressEvent(e);
+}
+
+void StringListEdit::wheelEvent(QWheelEvent *e)
+{
+    if (e->delta() < 0){
+        selectNext();
+        e->accept();
+        return;
+    }
+    if (e->delta() > 0){
+        selectPrev();
+        e->accept();
+        return;
+    }
+    QWidget::wheelEvent(e);
 }
 
 void StringListEdit::setMode(StringListEdit::Mode mode)

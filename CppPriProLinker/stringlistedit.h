@@ -15,10 +15,17 @@ class StringListEdit : public QWidget
 public:
     explicit StringListEdit(QWidget *parent = nullptr);
     void addItems(const QStringList &items);
+    void selectWithOffset(int offset);
 protected slots:
     void updateListAccordingToLineEdit();
+    void updateSelectedView();
+    void select(const QString &item);
+    void selectNext();
+    void selectPrev();
 protected:
     enum class Mode {Invalid, Search, Edit};
+    void keyPressEvent(QKeyEvent *e) override;
+    void wheelEvent(QWheelEvent *e) override;
     QComboBox *m_modeEdit = nullptr;
     QLineEdit *m_textEdit = nullptr;
     QPushButton *m_addButton = nullptr;
@@ -29,6 +36,10 @@ protected:
     QFrame *m_searchFrame = nullptr;
     Mode m_mode = Mode::Invalid;
     QStringList m_items;
+    QString m_selected;
+
+    QStringList m_shownItemsCache;
+    QListWidgetItem *m_lastSelectedItem = nullptr;
 
     void setMode(Mode mode);
     static void sortOptionsByScore(
