@@ -12,6 +12,7 @@ public:
     ~GuardConverterTests() override;
 private slots:
     void expectedConvertions();
+    void fileExtConvertions();
 };
 
 #endif // GUARDCONVERTERTESTS_H

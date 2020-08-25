@@ -15,11 +15,21 @@ GuardConverterTests::~GuardConverterTests()
 
 void GuardConverterTests::expectedConvertions()
 {
-    QCOMPARE(GuardcCnverter::convert("HighCamelCase.h"), QString("HIGH_CAMEL_CASE_H"));
-    QCOMPARE(GuardcCnverter::convert("low.pri"), QString("LOW_PRI"));
-    QCOMPARE(GuardcCnverter::convert("onestringname.h"), QString("ONESTRINGNAME_H"));
-    QCOMPARE(GuardcCnverter::convert("CAPS.h"), QString("CAPS_H"));
-    QCOMPARE(GuardcCnverter::convert("Project2App3.h"), QString("PROJECT_2_APP_3_H"));
-    QCOMPARE(GuardcCnverter::convert("Project2App3.h"), QString("PROJECT_2_APP_3_H"));
-    QCOMPARE(GuardcCnverter::convert("GuardConverter_Tests.h"), QString("GUARD_CONVERTER_TESTS_H"));
+    QCOMPARE(GuardcCnverter::convert("HighCamelCase"), QString("HIGH_CAMEL_CASE"));
+    QCOMPARE(GuardcCnverter::convert("low"), QString("LOW"));
+    QCOMPARE(GuardcCnverter::convert("Editor5"), QString("EDITOR_5"));
+    QCOMPARE(GuardcCnverter::convert("File10"), QString("FILE_10"));
+    QCOMPARE(GuardcCnverter::convert("10File10"), QString("10_FILE_10"));
+    QCOMPARE(GuardcCnverter::convert("High123High"), QString("HIGH_123_HIGH"));
+    QCOMPARE(GuardcCnverter::convert("High123low"), QString("HIGH_123_LOW"));
+    QCOMPARE(GuardcCnverter::convert("onestringname"), QString("ONESTRINGNAME"));
+    QCOMPARE(GuardcCnverter::convert("CAPS"), QString("CAPS"));
+    QCOMPARE(GuardcCnverter::convert("Project2App3"), QString("PROJECT_2_APP_3"));
+    QCOMPARE(GuardcCnverter::convert("Project2App3"), QString("PROJECT_2_APP_3"));
+    QCOMPARE(GuardcCnverter::convert("GuardConverter_Tests"), QString("GUARD_CONVERTER_TESTS"));
+}
+
+void GuardConverterTests::fileExtConvertions()
+{
+
 }
