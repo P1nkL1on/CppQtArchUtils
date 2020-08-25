@@ -11,9 +11,9 @@ enum TokenType
     Qoute,
     Char,
     Directive,
-    OpenCurly,
-    CloseCurly,
-    Block
+    BlockOpen,
+    BlockClose,
+    StructBlockOpen,
 };
 
 struct Token
@@ -28,7 +28,16 @@ struct Token
 class FileTokenizer
 {
 public:
-    static QVector<Token> tokenize(const QString &text);
+    FileTokenizer();
+    QVector<Token> tokenize(const QString &text) const;
+    static QVector<Token> tokenize(
+            const QString &text,
+            const QVector<QRegExp> &tokenRegExpPatterns,
+            const QRegExp &skipRegExpPattern,
+            const QVector<TokenType> &dismissTokenTypes = {});
+protected:
+    QVector<QRegExp> m_tokenRegExpPatterns;
+    QRegExp m_skipRegExpPattern;
 
 };
 
