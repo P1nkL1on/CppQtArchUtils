@@ -12,6 +12,8 @@
 LineEditWithHintList::LineEditWithHintList(QWidget *parent) : QWidget(parent)
 {
     auto layout = new QVBoxLayout;
+    setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
 
     m_textEdit = new QLineEdit;
@@ -52,6 +54,8 @@ LineEditWithHintList::~LineEditWithHintList()
 {
     m_textEdit->removeEventFilter(this);
     m_searchFrame->removeEventFilter(this);
+    removeEventFilter(this);
+    m_textEdit->deleteLater();
 }
 
 void LineEditWithHintList::addHints(const QStringList &items)
@@ -80,9 +84,10 @@ void LineEditWithHintList::confirmHint()
 
 void LineEditWithHintList::confirmText()
 {
-    qDebug() << "editing finished:" << m_textEdit->text();
     hideList();
     emit editingFinished();
+//    setFocus();
+    qDebug() << m_textEdit->text();
 }
 
 void LineEditWithHintList::selectWithOffset(int offset)
@@ -98,9 +103,8 @@ void LineEditWithHintList::select(const QString &item)
 {
     if (m_items.isEmpty())
         return;
-    if (not m_items.contains(item))
-        return;
-    m_selected = item;
+    m_selected = m_items.contains(item) ?
+        item : QString();
     updateListSelectedItem();
 }
 
@@ -142,10 +146,13 @@ bool LineEditWithHintList::eventFilter(QObject *watched, QEvent *event)
             confirmText();
     }
 
+    if (event->type() == QEvent::Hide and watched == this)
+        hideList();
+
     if (event->type() == QEvent::KeyPress and watched == m_textEdit){
         QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
         if (keyEvent->key() == Qt::Key_Return){
-            if (not m_selected.isEmpty()){
+            if (not m_selected.isEmpty() and m_shownItemsCache.contains(m_selected)){
                 confirmHint();
                 event->accept();
                 return true;
@@ -180,7 +187,6 @@ bool LineEditWithHintList::eventFilter(QObject *watched, QEvent *event)
             return true;
         }
     }
-
     if (event->type() == QEvent::KeyPress and watched == m_searchFrame){
         QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
         QKeyEvent eventRedirected(keyEvent->type(), keyEvent->key(), keyEvent->modifiers(), keyEvent->text(), keyEvent->isAutoRepeat(), keyEvent->count());
@@ -212,6 +218,9 @@ void LineEditWithHintList::updateListItems(const QString &searchString)
             m_shownItemsCache << item;
     m_listView->addItems(m_shownItemsCache);
 
+    if (m_shownItemsCache.isEmpty())
+        m_selected.clear();
+
     const int shownCount = m_shownItemsCache.size();
     const int totalCount = m_items.size();
     if (shownCount < totalCount){
@@ -236,7 +245,7 @@ void LineEditWithHintList::updateListSelectedItem()
     m_lastSelectedItem = m_listView->item(selectedInd);
     if (not m_lastSelectedItem)
         return;
-    m_lastSelectedItem->setBackgroundColor(Qt::yellow);
+    m_lastSelectedItem->setBackgroundColor(QColor(122, 182, 255));
     m_listView->scrollToItem(m_lastSelectedItem);
 }
 
@@ -266,6 +275,9 @@ void LineEditWithHintList::sortOptionsByScore(
 
 int LineEditWithHintList::optionScore( const QString &searchingFor, const QString &value)
 {
+    if (searchingFor == value)
+        return 1;
+
     int score = 0;
     int valueInd = 0;
     int searchingForInd = 0;

@@ -17,7 +17,7 @@ Form::Form(QWidget *parent)
 
     // layout
     auto centralWidget = new QWidget;
-    auto hLayout = new QHBoxLayout;
+    auto vLayout = new QVBoxLayout;
     auto fLayout = new QFormLayout;
     auto skipEmptyBlocksEdit = new QCheckBox;
     auto tabToSpaceCountEdit  = new QSpinBox;
@@ -25,20 +25,22 @@ Form::Form(QWidget *parent)
     m_textPreviewEdit = new QPlainTextEdit;
 
 
-    centralWidget->setLayout(hLayout);
-    hLayout->addLayout(fLayout, 1);
+    centralWidget->setLayout(vLayout);
+    vLayout->addLayout(fLayout, 1);
     fLayout->addRow("Tab to Space Count", tabToSpaceCountEdit);
     tabToSpaceCountEdit->setValue(4);
     fLayout->addRow("Skip Empty Blocks", skipEmptyBlocksEdit);
     fLayout->addRow("New Lines Between Blocks", newLinesBetweenBlocksEdit);
 
-    hLayout->addWidget(m_textPreviewEdit, 1);
+    vLayout->addWidget(m_textPreviewEdit, 1);
     m_textPreviewEdit->setReadOnly(true);
     m_textPreviewEdit->setFont(QFont("Courier New", 10));
 
-    auto editor = new LineEditWithHintList;
-    editor->addHints({"abcdefgh", "ghjlqwepoqwi123456", "13579", "00000000", "asdasdsad1220", "aasss0oooo0", "0", "FUU00UCK"});
-    hLayout->addWidget(editor);
+    for (int i = 0; i < 5; ++i){
+        auto editor = new LineEditWithHintList;
+        editor->addHints({"abcdefgh", "ghjlqwepoqwi123456", "13579", "00000000", "asdasdsad1220", "aasss0oooo0", "0", "FUU00UCK"});
+        vLayout->addWidget(editor);
+    }
 
     setCentralWidget(centralWidget);
 
