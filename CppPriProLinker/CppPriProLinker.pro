@@ -16,19 +16,27 @@ SOURCES += \
     templatedecoderfactory.cpp \
     guardconverter_tests.cpp \
     guardconverter.cpp \
-    lineeditwithhintlist.cpp
+    lineeditwithhintlist.cpp \
+    file.cpp \
+    file_link.cpp \
+    file_parser.cpp \
+    form2.cpp
 
 HEADERS += \
     form.h \
     templateloader.h \
-    filedata.h \
     templateloader_tests.h \
     templatedecoder.h \
     templatedecoder_tests.h \
     templatedecoderfactory.h \
     guardconverter_tests.h \
     guardconverter.h \
-    lineeditwithhintlist.h
+    lineeditwithhintlist.h \
+    file.h \
+    file_link.h \
+    file_data.h \
+    file_parser.h \
+    form2.h
 
 RESOURCES += \
     FileTempaltes/filetemplates.qrc \

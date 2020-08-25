@@ -39,7 +39,8 @@ void GuardConverterTests::fileExtConvertions()
     QCOMPARE(GuardcCnverter::convert("FileName!.ext!ext"), QString("FILE_NAME_EXT_EXT"));
 }
 
-void GuardConverterTests::emptyCase()
+void GuardConverterTests::otherCases()
 {
     QCOMPARE(GuardcCnverter::convert(""), QString(""));
+    QCOMPARE(GuardcCnverter::convert("Namespace::OtherNamespace::Class"), QString("NAMESPACE_OTHER_NAMESPACE_CLASS"));
 }

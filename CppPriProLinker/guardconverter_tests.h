@@ -13,7 +13,7 @@ public:
 private slots:
     void expectedConvertions();
     void fileExtConvertions();
-    void emptyCase();
+    void otherCases();
 };
 
 #endif // GUARDCONVERTERTESTS_H

@@ -1,4 +1,4 @@
-#include "form.h"
+#include "form2.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -6,8 +6,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Form w;
-    w.show();
+    Form2 w;
+    w.showMaximized();
 
     return a.exec();
 }

@@ -12,7 +12,7 @@ class Form : public QMainWindow
     Q_OBJECT
 
 public:
-    Form(QWidget *parent = 0);
+    Form(QWidget *parent = nullptr);
     ~Form();
 protected slots:
     void updatePreview();

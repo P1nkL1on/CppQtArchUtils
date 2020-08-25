@@ -1,7 +1,7 @@
 #ifndef TEMPLATEDECODER_H
 #define TEMPLATEDECODER_H
 
-#include "filedata.h"
+#include "file_data.h"
 
 #include <QHash>
 
