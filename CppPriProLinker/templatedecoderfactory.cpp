@@ -34,7 +34,8 @@ TemplateDecoder TemplateDecoderFactory::create(
         }
         const QString pwdStr = useCppPWD ? "$$PWD/" : "";
         QStringList blockTemplateData {
-            QString("%1 += \\").arg(blockTitle),
+            QString("%1$%2_NEWLINE_START")
+                    .arg(blockTitle).arg(blockName),
             "$REPEAT",
             QString("\t%2$%1_RELATIVE_PATHES$%1_LINE_SEPARATORS")
                     .arg(blockName).arg(pwdStr),
@@ -49,6 +50,7 @@ TemplateDecoder TemplateDecoderFactory::create(
         decoder.setVariableToTemplate("$" + blockName, blockTemplateData);
         decoder.setVariableToStringList(QString("$%1_RELATIVE_PATHES").arg(blockName), blockFileRelativePathes);
         decoder.setVariableToStringList(QString("$%1_LINE_SEPARATORS").arg(blockName), lineSeparators);
+        decoder.setVariableToString(QString("$%1_NEWLINE_START").arg(blockName), blockFileRelativePathes.isEmpty() ? "" : " += \\");
     };
 
     for (const QString &blockName : blockNameToFileNames.keys()){

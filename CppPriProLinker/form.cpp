@@ -84,7 +84,6 @@ void Form::updatePreview()
         "form.cpp", "computer.cpp", "main.cpp"
     };
     const QStringList resources {
-        "a.qrc"
     };
     m_decoder = TemplateDecoderFactory::create(
                 pris,
