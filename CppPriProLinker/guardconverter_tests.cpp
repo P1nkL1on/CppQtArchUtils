@@ -31,5 +31,15 @@ void GuardConverterTests::expectedConvertions()
 
 void GuardConverterTests::fileExtConvertions()
 {
+    QCOMPARE(GuardcCnverter::convert("FileName.ext"), QString("FILE_NAME_EXT"));
+    QCOMPARE(GuardcCnverter::convert("FileName..ext"), QString("FILE_NAME_EXT"));
+    QCOMPARE(GuardcCnverter::convert("FileName.pro.user"), QString("FILE_NAME_PRO_USER"));
+    QCOMPARE(GuardcCnverter::convert("FileName.ext1.ext2"), QString("FILE_NAME_EXT_1_EXT_2"));
+    QCOMPARE(GuardcCnverter::convert("FileName."), QString("FILE_NAME"));
+    QCOMPARE(GuardcCnverter::convert("FileName!.ext!ext"), QString("FILE_NAME_EXT_EXT"));
+}
 
+void GuardConverterTests::emptyCase()
+{
+    QCOMPARE(GuardcCnverter::convert(""), QString(""));
 }

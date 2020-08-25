@@ -1,6 +1,5 @@
 #include "guardconverter.h"
 
-
 enum LetterType {
     Other = -1,
     Upper,
