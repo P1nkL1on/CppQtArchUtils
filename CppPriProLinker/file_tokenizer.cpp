@@ -7,10 +7,14 @@
 QVector<Token> FileTokenizer::tokenize(const QString &text)
 {
     QMap<TokenType, QRegExp> regs {
-        {Directive, QRegExp("#(\\S*)")},
+        {AreaComment, QRegExp("\\/\\*([^*]|\\*(?!\\/))*\\*\\/")},
+        {LineComment, QRegExp("\\/\\/[^\n]*")},
+        {Directive, QRegExp("#(\\S*)(\\s+)((<([^>]*)>|\"([^\"]*)\")|([^\\s+]*))")},
         {Qoute, QRegExp("\"([^\"\\n]|\\\\\")*\"?")},
         {Char, QRegExp("\'(\\\\?[^\'\\n]|\\\\\')\'?")},
-        {WhiteSpace, QRegExp("(\\s+)")}
+        {OpenCurly, QRegExp("\\{")},
+        {CloseCurly, QRegExp("\\}")},
+        {Block, QRegExp("(class|struct|namespace)(\\s+)([a-zA-Z_$][a-zA-Z_$0-9]*)(\\s*)\\{")},
     };
 
     int currentInd = 0;
@@ -31,7 +35,8 @@ QVector<Token> FileTokenizer::tokenize(const QString &text)
             }
         }
         if (foundType == None)
-            break;
+//            break;
+            ++currentInd;
     }
     return res;
 }

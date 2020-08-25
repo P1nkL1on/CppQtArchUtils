@@ -34,16 +34,15 @@ Form2::Form2(QWidget *parent) :
 
 
     const QStringList tokenNames {
-        "Comment",
+        "AreaComment",
+        "LineComment",
         "Qoute",
         "Char",
         "Directive",
-        "Open Curly",
-        "Close Curly",
-        "Key Word",
-        "Name",
-        "Number",
-        "White Space"
+        "OpenCurly",
+        "CloseCurly",
+        "Block",
+        "Code"
     };
 
     m_filesList->addItems(filePathes);
@@ -68,7 +67,7 @@ Form2::Form2(QWidget *parent) :
         QVector<Token> tokens = FileTokenizer::tokenize(text);
         QString tokensStr;
         for (const Token &token : tokens)
-            tokensStr += QString("%1:  %2\n")
+            tokensStr += QString("%1:  \t%2\n")
                     .arg(tokenNames.at(token.type))
                     .arg(token.text);
         QString linksStr;

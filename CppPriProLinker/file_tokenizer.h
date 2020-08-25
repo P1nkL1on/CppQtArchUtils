@@ -6,16 +6,14 @@
 enum TokenType
 {
     None = -1,
-    Comment = 0,
+    AreaComment = 0,
+    LineComment,
     Qoute,
     Char,
     Directive,
     OpenCurly,
     CloseCurly,
-    KeyWord,
-    Name,
-    Num,
-    WhiteSpace
+    Block,
 };
 
 struct Token
