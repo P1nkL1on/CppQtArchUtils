@@ -14,9 +14,9 @@ SOURCES += \
     templatedecoder.cpp \
     templatedecoder_tests.cpp \
     templatedecoderfactory.cpp \
-    stringlistedit.cpp \
     guardconverter_tests.cpp \
-    guardconverter.cpp
+    guardconverter.cpp \
+    lineeditwithhintlist.cpp
 
 HEADERS += \
     form.h \
@@ -26,9 +26,9 @@ HEADERS += \
     templatedecoder.h \
     templatedecoder_tests.h \
     templatedecoderfactory.h \
-    stringlistedit.h \
     guardconverter_tests.h \
-    guardconverter.h
+    guardconverter.h \
+    lineeditwithhintlist.h
 
 RESOURCES += \
     FileTempaltes/filetemplates.qrc \

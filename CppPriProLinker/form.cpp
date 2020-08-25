@@ -8,7 +8,7 @@
 #include <QFormLayout>
 #include <QMessageBox>
 
-#include "stringlistedit.h"
+#include "lineeditwithhintlist.h"
 
 Form::Form(QWidget *parent)
     : QMainWindow(parent)
@@ -36,8 +36,8 @@ Form::Form(QWidget *parent)
     m_textPreviewEdit->setReadOnly(true);
     m_textPreviewEdit->setFont(QFont("Courier New", 10));
 
-    auto editor = new StringListEdit;
-    editor->addItems({"abcdefgh", "ghjlqwepoqwi123456", "13579", "00000000", "asdasdsad1220", "aasss0oooo0", "0", "FUU00UCK"});
+    auto editor = new LineEditWithHintList;
+    editor->addHints({"abcdefgh", "ghjlqwepoqwi123456", "13579", "00000000", "asdasdsad1220", "aasss0oooo0", "0", "FUU00UCK"});
     hLayout->addWidget(editor);
 
     setCentralWidget(centralWidget);

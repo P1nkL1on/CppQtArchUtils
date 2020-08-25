@@ -9,39 +9,42 @@
 #include <QBoxLayout>
 #include <QFrame>
 
-class StringListEdit : public QWidget
+class LineEditWithHintList : public QWidget
 {
     Q_OBJECT
 public:
-    explicit StringListEdit(QWidget *parent = nullptr);
-    void addItems(const QStringList &items);
-    void selectWithOffset(int offset);
+    explicit LineEditWithHintList(QWidget *parent = nullptr);
+    ~LineEditWithHintList() override;
+    void addHints(const QStringList &items);
+signals:
+    void editingFinished();
 protected slots:
-    void updateListAccordingToLineEdit();
-    void updateSelectedView();
+    void updateList();
+    void confirmHint();
+    void confirmText();
+protected:
+    void selectWithOffset(int offset);
+    void updateListItems(const QString &searchString);
+    void updateListSelectedItem();
+    void updateListPos();
     void select(const QString &item);
     void selectNext();
     void selectPrev();
-protected:
-    enum class Mode {Invalid, Search, Edit};
-    void keyPressEvent(QKeyEvent *e) override;
-    void wheelEvent(QWheelEvent *e) override;
-    QComboBox *m_modeEdit = nullptr;
+    void showList();
+    void hideList();
+
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
     QLineEdit *m_textEdit = nullptr;
-    QPushButton *m_addButton = nullptr;
-    QPushButton *m_removeButton = nullptr;
     QCheckBox *m_caseSensetiveEdit = nullptr;
     QListWidget *m_listView = nullptr;
-    QFrame *m_editFrame = nullptr;
     QFrame *m_searchFrame = nullptr;
-    Mode m_mode = Mode::Invalid;
+
     QStringList m_items;
     QString m_selected;
-
     QStringList m_shownItemsCache;
     QListWidgetItem *m_lastSelectedItem = nullptr;
 
-    void setMode(Mode mode);
     static void sortOptionsByScore(
             const QString &searchingFor,
             bool caseSensetive,
