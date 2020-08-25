@@ -4,57 +4,11 @@
 #include <QMap>
 #include <QtDebug>
 
-//const QMap<TokenType, QRegExp> regs {
-//    {AreaComment, QRegExp("\\/\\*([^*]|\\*(?!\\/))*\\*\\/")},
-//    {LineComment, QRegExp("\\/\\/[^\n]*")},
-//    {Qoute,       QRegExp("\"([^\"\\n]|\\\\\")*\"?")},
-//    {Char,        QRegExp("\'(\\\\?[^\'\\n]|\\\\\')\'?")},
-//    {Directive,   QRegExp("#(\\S*)(\\s+)((<([^>]*)>|"
-//                          "\"([^\"]*)\")|([^\\s+]*))")},
-//    {OpenCurly,   QRegExp("\\{")},
-//    {CloseCurly,  QRegExp("\\}")},
-//    {Block,       QRegExp("(class|struct|namespace)"
-//                          "(\\s+)([a-zA-Z_$][a-zA-Z_$0-9]*)"
-//                          "(\\s*)(:[^\\{]*)?\\{")},
-//};
-
-//int currentInd = 0;
-
-//QVector<Token> res;
-//QMap<TokenType, int> cacheTokenPos;
-
-//while (currentInd < text.size()){
-//    int capturedInd = -1;
-//    TokenType foundType = None;
-//    for (const QRegExp &reg : regs){
-//        const TokenType tokenType = regs.key(reg);
-//        capturedInd = cacheTokenPos.value(tokenType, -1);
-//        if (capturedInd < currentInd){
-//            capturedInd = reg.indexIn(text, currentInd);
-//            cacheTokenPos.insert(tokenType, capturedInd);
-//        }
-//        if (capturedInd == currentInd){
-//            foundType = tokenType;
-//            const int length = reg.matchedLength();
-//            const QString tokenText = text.mid(currentInd, length);
-//            currentInd += length;
-//            res << Token(foundType, tokenText);
-//            break;
-//        }
-//    }
-//    if (foundType == None){
-//        const int jumpToInd = text.indexOf(QRegExp("(class|struct|namespace)|(\\/\\/)|(\\/\\*)|#|\"|\'|\\{|\\}"), currentInd + 1);
-//        currentInd = jumpToInd >= 0 ? jumpToInd : (text.size());
-//    }
-//}
-//return res;
-//}
-
 FileTokenizer::FileTokenizer()
 {
     QMap<TokenType, QString> tokenTypeToRegExpPattern {
-        {StructBlockOpen,       "(class|struct|namespace)"
-                      "(\\s+)([a-zA-Z_$][a-zA-Z_$0-9]*)"
+        {StructBlockOpen,    "(class|struct|namespace)"
+                      "(\\s+)([a-zA-Z_][a-zA-Z_:0-9]*)"
                       "(\\s*)(:[^\\{]*)?\\{"},
         {Directive,   "#(\\S*)(\\s+)((<([^>]*)>|"
                       "\"([^\"]*)\")|([^\\s+]*))"},
@@ -76,8 +30,30 @@ FileTokenizer::FileTokenizer()
 
 QVector<Token> FileTokenizer::tokenize(const QString &text) const
 {
-    return tokenize(text, m_tokenRegExpPatterns, m_skipRegExpPattern,
-                    {AreaComment, LineComment, Qoute, Char});
+    return tokenize(text, m_tokenRegExpPatterns, m_skipRegExpPattern);
+}
+
+void FileTokenizer::parse(const QString &text, QStringList &includes, QStringList &namespaces, QStringList &classes, QString &guard) const
+{
+    const QVector<Token> tokens = tokenize(text, m_tokenRegExpPatterns, m_skipRegExpPattern,
+        {AreaComment, LineComment, Qoute, Char, BlockOpen, BlockClose});
+    const QRegExp spaceRegExp("(\\s|\\{)+");
+    for (const Token &token : tokens){
+        const QStringList splitedToken = token.text.trimmed()
+                .split(spaceRegExp, QString::SkipEmptyParts);
+        const QString value = splitedToken[1];
+        if (token.type == Directive){
+            if (splitedToken.first() == "#include")
+                includes << value;
+            else if (guard.isEmpty() and splitedToken.first() == "#ifndef")
+                guard = value;
+        } else if (token.type == StructBlockOpen){
+            if (splitedToken.first() == "namespace")
+                namespaces << value;
+            else
+                classes << value;
+        }
+    }
 }
 
 QVector<Token> FileTokenizer::tokenize(const QString &text,

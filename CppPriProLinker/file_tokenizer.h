@@ -30,6 +30,12 @@ class FileTokenizer
 public:
     FileTokenizer();
     QVector<Token> tokenize(const QString &text) const;
+    void parse(
+            const QString &text,
+            QStringList &includes,
+            QStringList &namespaces,
+            QStringList &classes,
+            QString &guard) const;
     static QVector<Token> tokenize(
             const QString &text,
             const QVector<QRegExp> &tokenRegExpPatterns,
