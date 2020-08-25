@@ -14,6 +14,7 @@ enum TokenType
     BlockOpen,
     BlockClose,
     StructBlockOpen,
+    Skip,
 };
 
 struct Token
@@ -39,11 +40,9 @@ public:
     static QVector<Token> tokenize(
             const QString &text,
             const QVector<QRegExp> &tokenRegExpPatterns,
-            const QRegExp &skipRegExpPattern,
             const QVector<TokenType> &dismissTokenTypes = {});
 protected:
     QVector<QRegExp> m_tokenRegExpPatterns;
-    QRegExp m_skipRegExpPattern;
 
 };
 
