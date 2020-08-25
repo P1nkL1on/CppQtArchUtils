@@ -13,7 +13,6 @@ SOURCES += \
     templateloader_tests.cpp \
     templatedecoder.cpp \
     templatedecoder_tests.cpp \
-    templatedecoderfactory.cpp \
     guardconverter_tests.cpp \
     guardconverter.cpp \
     lineeditwithhintlist.cpp \
@@ -21,7 +20,8 @@ SOURCES += \
     file_link.cpp \
     file_parser.cpp \
     form2.cpp \
-    file_tokenizer.cpp
+    file_tokenizer.cpp \
+    templatedecoder_factory.cpp
 
 HEADERS += \
     form.h \
@@ -29,7 +29,6 @@ HEADERS += \
     templateloader_tests.h \
     templatedecoder.h \
     templatedecoder_tests.h \
-    templatedecoderfactory.h \
     guardconverter_tests.h \
     guardconverter.h \
     lineeditwithhintlist.h \
@@ -38,7 +37,8 @@ HEADERS += \
     file_data.h \
     file_parser.h \
     form2.h \
-    file_tokenizer.h
+    file_tokenizer.h \
+    templatedecoder_factory.h
 
 RESOURCES += \
     FileTempaltes/filetemplates.qrc \

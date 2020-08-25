@@ -1,4 +1,4 @@
-#include "templatedecoderfactory.h"
+#include "templatedecoder_factory.h"
 
 #include <QtDebug>
 

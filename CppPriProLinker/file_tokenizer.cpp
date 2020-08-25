@@ -29,7 +29,7 @@ QVector<Token> FileTokenizer::tokenize(const QString &text) const
     return tokenize(text, m_tokenRegExpPatterns);
 }
 
-void FileTokenizer::parse(
+void FileTokenizer::parseCpp(
             const QString &text,
             QStringList &includes,
             QStringList &namespaces,

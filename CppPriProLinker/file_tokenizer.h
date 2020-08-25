@@ -29,9 +29,11 @@ struct Token
 class FileTokenizer
 {
 public:
+    // todo create factory for cpp / pri
     FileTokenizer();
     QVector<Token> tokenize(const QString &text) const;
-    void parse(
+    // todo move to parser
+    void parseCpp(
             const QString &text,
             QStringList &includes,
             QStringList &namespaces,

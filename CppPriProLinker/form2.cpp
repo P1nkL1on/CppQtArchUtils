@@ -2,6 +2,8 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QDirIterator>
+#include <QElapsedTimer>
+#include <QDebug>
 #include "file_parser.h"
 #include "file_tokenizer.h"
 
@@ -23,16 +25,30 @@ Form2::Form2(QWidget *parent) :
     layout->addWidget(m_tokenText = new QPlainTextEdit, 1);
     m_tokenText->setReadOnly(true);
 
+    FileTokenizer tokenizer;
     QDirIterator dirIterator(
-                "D:\\Prohor",
+                "D:\\",
                 QStringList{"*.h"},
                 QDir::Files,
                 QDirIterator::Subdirectories);
+
+//    int totalLoadingTime = 0;
+//    int totalTokenizingTime = 0;
+//    while (dirIterator.hasNext()){
+//        const auto path = dirIterator.next();
+//        int loadingTime, tokenizingTime;
+//        tokenize(path, tokenizer, loadingTime, tokenizingTime);
+
+//        totalLoadingTime += loadingTime;
+//        totalTokenizingTime += tokenizingTime;
+//        qDebug() << dirIterator.fileInfo().fileName() << "Loading:" << loadingTime << "Tokenizing:" << tokenizingTime;
+//    }
+//    qDebug() << "Total loading:" << totalLoadingTime << "Total tokenizing:" << totalTokenizingTime;
+//    return;
+
     QStringList filePathes;
     while (dirIterator.hasNext())
         filePathes << dirIterator.next();
-
-
     const QStringList tokenNames {
         "AreaComment",
         "LineComment",
@@ -56,25 +72,31 @@ Form2::Form2(QWidget *parent) :
             m_resultText->setPlainText(QString("Loading error: %1").arg(err));
             return;
         }
+
+        QString text = data.join("\n");
+
         QString guard;
-        QVector<FileLink> links;
+//        QVector<FileLink> links;
+        QStringList linkStrs;
         QStringList classes;
-        FileParser::parseHeader(data, links, classes, guard);
+        QStringList namespaces;
+        tokenizer.parseCpp(text, linkStrs, namespaces, classes, guard);
+        // FileParser::parseHeader(data, links, classes, guard);
 
-        QString text;
-        m_fileText->setPlainText(text = data.join("\n"));
+        m_fileText->setPlainText(text);
 
-        QVector<Token> tokens = FileTokenizer::tokenize(text);
+        QVector<Token> tokens = tokenizer.tokenize(text);
         QString tokensStr;
         for (const Token &token : tokens)
             tokensStr += QString("%1:  \t%2\n")
                     .arg(tokenNames.at(token.type))
                     .arg(token.text);
-        QString linksStr;
-        for (const FileLink &link : links)
-            linksStr += QString("    %1\n").arg(link.includePath());
-        m_resultText->setPlainText(QString("Guard: '%1'\n\nLinks:\n%2\nClasses:\n    %3")
-                                   .arg(guard).arg(linksStr).arg(classes.join("\n    ")));
+
+        m_resultText->setPlainText(QString("Guard: '%1'\n\nLinks:\n    %2\nClasses:\n    %3\nNamespaces:\n    %4")
+                                   .arg(guard)
+                                   .arg(linkStrs.join("\n    "))
+                                   .arg(classes.join("\n    "))
+                                   .arg(namespaces.join("\n    ")));
         m_tokenText->setPlainText(tokensStr);
     });
 
@@ -83,4 +105,20 @@ Form2::Form2(QWidget *parent) :
 
 Form2::~Form2()
 {
+}
+
+QVector<Token> Form2::tokenize(const QString &filePath, const FileTokenizer &tokenizer, int &loadingTime, int &tokenizingTime)
+{
+    QElapsedTimer timer;
+    timer.start();
+    FileData data;
+    QString err;
+    const bool isOk = FileParser::readFileData(filePath, data, err);
+    loadingTime = timer.elapsed();
+    Q_ASSERT(isOk);
+
+    timer.restart();
+    const QVector<Token> tokens = tokenizer.tokenize(data.join("\n"));
+    tokenizingTime = timer.elapsed();
+    return tokens;
 }
