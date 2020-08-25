@@ -13,8 +13,7 @@ enum TokenType
     Directive,
     OpenCurly,
     CloseCurly,
-    Block,
-    Code
+    Block
 };
 
 struct Token
