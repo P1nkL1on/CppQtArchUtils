@@ -51,7 +51,9 @@ QVector<Token> Tokenizer::tokenize
 
 Tokenizer Tokenizer::headerTokenizer()
 {
-    const QMap<TokenType, QString> tokenTypeToRegExpPattern {
+    // todo
+    // before tokenizing remove comments, qoutes and chars in text
+    const QMap<TokenType, QString> regExpMap {
         {StructBlockOpen,    "((namespace(\\s+)([a-zA-Z_][a-zA-Z_:0-9]*)(\\s*)\\{))|" // namespace A::B {
                              "((class|struct)(\\s+)([a-zA-Z_][a-zA-Z_:0-9]*)"         // class_%name%
                              "(\\s*)(:[^\\{]*)?\\{)"},                                // : public %base_class_name% {
@@ -64,8 +66,23 @@ Tokenizer Tokenizer::headerTokenizer()
         {BlockOpen,   "\\{"},
         {BlockClose,  "\\}"}
     };
+    return regExpMapToTokenizer(regExpMap);
+}
+
+Tokenizer Tokenizer::priTokenizer()
+{
+    const QMap<TokenType, QString> regExpMap {
+        {LineComment, "#[^\n]*"},
+        {BlockOpen,   "\\{"},
+        {BlockClose,  "\\}"}
+    };
+    return regExpMapToTokenizer(regExpMap);
+}
+
+Tokenizer Tokenizer::regExpMapToTokenizer(const QMap<TokenType, QString> &regExpMap)
+{
     QVector<QRegExp> tokenRegExpPatterns;
-    for (const QString &pattern : tokenTypeToRegExpPattern)
+    for (const QString &pattern : regExpMap)
         tokenRegExpPatterns << QRegExp(pattern);
 
     return Tokenizer(tokenRegExpPatterns);
