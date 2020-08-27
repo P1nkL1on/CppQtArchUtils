@@ -13,8 +13,7 @@ enum TokenType
     Directive,
     BlockOpen,
     BlockClose,
-    StructBlockOpen,
-    Skip,
+    StructBlockOpen
 };
 
 struct Token

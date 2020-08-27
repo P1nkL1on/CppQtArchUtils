@@ -17,8 +17,7 @@ FileTokenizer::FileTokenizer()
         {Qoute,       "\"([^\"\\n]|\\\\\")*\"?"},
         {LineComment, "\\/\\/[^\n]*"},
         {BlockOpen,   "\\{"},
-        {BlockClose,  "\\}"},
-        {Skip,        "(class|struct|namespace)|(\\/\\/)|(\\/\\*)|#|\"|\'|\\{|\\}"}
+        {BlockClose,  "\\}"}
     };
     for (const QString &pattern : tokenTypeToRegExpPattern)
         m_tokenRegExpPatterns << QRegExp(pattern);
@@ -54,7 +53,8 @@ void FileTokenizer::parseCpp(
         }
         const QStringList splitedToken = token.text.trimmed()
                 .split(spaceRegExp, QString::SkipEmptyParts);
-        const QString value = splitedToken[1];
+        const QString value = splitedToken.size() > 1 ?
+                    splitedToken[1] : QString();
         if (token.type == Directive){
             if (splitedToken.first() == "#include")
                 includes << value;
@@ -77,37 +77,35 @@ QVector<Token> FileTokenizer::tokenize(
             const QVector<QRegExp> &tokenRegExpPatterns,
             const QVector<TokenType> &dismissTokenTypes)
 {
-    Q_ASSERT(tokenRegExpPatterns.size() == 9);
     int currentInd = 0;
     QVector<Token> res;
-    const QRegExp &skipRegExpPattern = tokenRegExpPatterns[Skip];
     QVector<int> cacheTokenPos(8, -1);
     while (currentInd < text.size()){
-        int capturedInd = -1;
-        TokenType foundType = None;
-        for (int typeInd = AreaComment; typeInd <= StructBlockOpen; ++typeInd){
+        TokenType nextType = None;
+        int minNextInd = text.size();
+        for (int typeInd = 0; typeInd < tokenRegExpPatterns.size(); ++typeInd){
             const TokenType tokenType = TokenType(typeInd);
             const QRegExp &reg = tokenRegExpPatterns[tokenType];
-            capturedInd = cacheTokenPos[tokenType];
-            if (capturedInd < currentInd){
-                capturedInd = reg.indexIn(text, currentInd);
-                cacheTokenPos[tokenType] = capturedInd;
+            int nextInd = cacheTokenPos[tokenType];
+            if (nextInd < currentInd){
+                nextInd = reg.indexIn(text, currentInd);
+                cacheTokenPos[tokenType] = nextInd;
             }
-            if (capturedInd == currentInd){
-                const int length = reg.matchedLength();
-                if (not dismissTokenTypes.contains(tokenType)){
-                    const QString tokenText = text.mid(currentInd, length);
-                    res << Token(tokenType, tokenText);
-                }
-                foundType = tokenType;
-                currentInd += length;
+            if (nextInd >= currentInd and nextInd < minNextInd){
+                minNextInd = nextInd;
+                nextType = tokenType;
+            }
+            if (nextInd == currentInd)
                 break;
-            }
         }
-        if (foundType == None){
-            const int jumpToInd = text.indexOf(skipRegExpPattern, currentInd + 1);
-            currentInd = jumpToInd >= 0 ? jumpToInd : (text.size());
+        if (nextType == None)
+            break;
+        const int length = tokenRegExpPatterns[nextType].matchedLength();
+        if (not dismissTokenTypes.contains(nextType)){
+            const QString tokenText = text.mid(minNextInd, length);
+            res << Token(nextType, tokenText);
         }
+        currentInd = minNextInd + length;
     }
     return res;
 }
