@@ -1,6 +1,6 @@
-#include "guardconverter_tests.h"
+#include "guard_converter_tests.h"
 
-#include "guardconverter.h"
+#include "guard_converter.h"
 
 #include <QTest>
 

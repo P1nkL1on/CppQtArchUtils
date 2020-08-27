@@ -7,38 +7,36 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -std=c++17
 
 SOURCES += \
+    guard_converter.cpp \
+    guard_converter_tests.cpp \
+    lineedit_withhintlist.cpp \
     main.cpp \
     form.cpp \
-    templateloader.cpp \
-    templateloader_tests.cpp \
-    templatedecoder.cpp \
-    templatedecoder_tests.cpp \
-    guardconverter_tests.cpp \
-    guardconverter.cpp \
-    lineeditwithhintlist.cpp \
+    template_decoder.cpp \
+    template_decoder_tests.cpp \
+    template_loader.cpp \
     file.cpp \
     file_link.cpp \
     file_parser.cpp \
     form2.cpp \
     file_tokenizer.cpp \
-    templatedecoder_factory.cpp
+    template_loader_tests.cpp
 
 HEADERS += \
     form.h \
-    templateloader.h \
-    templateloader_tests.h \
-    templatedecoder.h \
-    templatedecoder_tests.h \
-    guardconverter_tests.h \
-    guardconverter.h \
-    lineeditwithhintlist.h \
+    guard_converter.h \
+    guard_converter_tests.h \
+    lineedit_withhintlist.h \
+    template_decoder.h \
+    template_decoder_tests.h \
+    template_loader.h \
     file.h \
     file_link.h \
     file_data.h \
     file_parser.h \
     form2.h \
     file_tokenizer.h \
-    templatedecoder_factory.h
+    template_loader_tests.h
 
 RESOURCES += \
     FileTempaltes/filetemplates.qrc \

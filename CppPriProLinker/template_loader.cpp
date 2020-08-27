@@ -1,4 +1,4 @@
-#include "templateloader.h"
+#include "template_loader.h"
 #include <QtDebug>
 
 TemplateLoader::TemplateLoader(const QMap<QString, QString> &templateNameToPathMap) :

@@ -1,6 +1,6 @@
-#include "templateloader_tests.h"
+#include "template_loader_tests.h"
 
-#include "templateloader.h"
+#include "template_loader.h"
 
 #include <QtTest>
 

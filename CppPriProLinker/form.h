@@ -4,8 +4,8 @@
 #include <QMainWindow>
 #include <QPlainTextEdit>
 
-#include "templateloader.h"
-#include "templatedecoder_factory.h"
+#include "template_loader.h"
+#include "template_decoder.h"
 
 class Form : public QMainWindow
 {

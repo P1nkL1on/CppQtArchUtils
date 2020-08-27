@@ -1,4 +1,4 @@
-#include "lineeditwithhintlist.h"
+#include "lineedit_withhintlist.h"
 
 #include <algorithm>
 

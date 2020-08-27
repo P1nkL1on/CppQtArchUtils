@@ -1,6 +1,6 @@
-#include "templatedecoder_tests.h"
+#include "template_decoder_tests.h"
 
-#include "templatedecoder.h"
+#include "template_decoder.h"
 
 #include <QtTest>
 

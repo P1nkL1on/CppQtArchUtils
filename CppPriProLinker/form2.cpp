@@ -27,7 +27,7 @@ Form2::Form2(QWidget *parent) :
 
     FileTokenizer tokenizer;
     QDirIterator dirIterator(
-                "D:\\",
+                "/home/alex/R3DS/Prohor",
                 QStringList{"*.h"},
                 QDir::Files,
                 QDirIterator::Subdirectories);
@@ -76,12 +76,10 @@ Form2::Form2(QWidget *parent) :
         QString text = data.join("\n");
 
         QString guard;
-//        QVector<FileLink> links;
         QStringList linkStrs;
         QStringList classes;
         QStringList namespaces;
         tokenizer.parseCpp(text, linkStrs, namespaces, classes, guard);
-        // FileParser::parseHeader(data, links, classes, guard);
 
         m_fileText->setPlainText(text);
 
@@ -92,7 +90,7 @@ Form2::Form2(QWidget *parent) :
                     .arg(tokenNames.at(token.type))
                     .arg(token.text);
 
-        m_resultText->setPlainText(QString("Guard: '%1'\n\nLinks:\n    %2\nClasses:\n    %3\nNamespaces:\n    %4")
+        m_resultText->setPlainText(QString("Guard: %1\n\nLinks:\n    %2\nClasses:\n    %3\nNamespaces:\n    %4")
                                    .arg(guard)
                                    .arg(linkStrs.join("\n    "))
                                    .arg(classes.join("\n    "))

@@ -34,9 +34,25 @@ class TemplateDecoder
 public:
     TemplateDecoder() = default;
     FileData decode(const FileData &data) const;
-    void setVariableToString(const QString &varName, const QString &stringValue);
-    void setVariableToStringList(const QString &varName, const QStringList &stringListValue);
-    void setVariableToTemplate(const QString &varName, const FileData &templateValue);
+    void setVariableToString(
+            const QString &varName,
+            const QString &stringValue);
+    void setVariableToStringList(
+            const QString &varName,
+            const QStringList &stringListValue);
+    void setVariableToTemplate(
+            const QString &varName,
+            const FileData &templateValue);
+    static TemplateDecoder priDecoder(
+            const QStringList &priRelativePathes,
+            const QStringList &headerRelativePathes,
+            const QStringList &sourceRelativePathes,
+            const QStringList &resourceRelativePathes,
+            int tabSpaceCount = 4,
+            bool skipEmptyBlocks = true,
+            int newLinesBetweenBlocks = 1,
+            bool usePriPWD = true,
+            bool useCppPWD = false);
 protected:
     QHash<QString, FileData> m_variableToTempalteHash;
     QHash<QString, QStringList> m_variableToStringListHash;

@@ -8,7 +8,7 @@
 #include <QFormLayout>
 #include <QMessageBox>
 
-#include "lineeditwithhintlist.h"
+#include "lineedit_withhintlist.h"
 
 Form::Form(QWidget *parent)
     : QMainWindow(parent)
@@ -87,7 +87,7 @@ void Form::updatePreview()
     };
     const QStringList resources {
     };
-    m_decoder = TemplateDecoderFactory::create(
+    m_decoder = TemplateDecoder::priDecoder(
                 pris,
                 headers,
                 sources,
