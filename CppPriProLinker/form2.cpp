@@ -4,8 +4,8 @@
 #include <QDirIterator>
 #include <QElapsedTimer>
 #include <QDebug>
-#include "file_parser.h"
-#include "file_tokenizer.h"
+#include "token_parser.h"
+#include "tokenizer.h"
 
 Form2::Form2(QWidget *parent) :
     QMainWindow(parent)
@@ -25,7 +25,7 @@ Form2::Form2(QWidget *parent) :
     layout->addWidget(m_tokenText = new QPlainTextEdit, 1);
     m_tokenText->setReadOnly(true);
 
-    FileTokenizer tokenizer;
+    Tokenizer tokenizer = Tokenizer::headerTokenizer();
     QDirIterator dirIterator(
                 "/home/alex/R3DS/Prohor",
                 QStringList{"*.h"},
@@ -68,22 +68,22 @@ Form2::Form2(QWidget *parent) :
         const QString filePath = item->text();
         FileData data;
         QString err;
-        if (not FileParser::readFileData(filePath, data, err)){
+        if (not TokenParser::readFileData(filePath, data, err)){
             m_resultText->setPlainText(QString("Loading error: %1").arg(err));
             return;
         }
 
-        QString text = data.join("\n");
+        const PlainFileData text = toPlainData(data);
 
         QString guard;
         QStringList linkStrs;
         QStringList classes;
         QStringList namespaces;
-        tokenizer.parseCpp(text, linkStrs, namespaces, classes, guard);
+        const QVector<Token> tokens = tokenizer.tokenize(text);
+        TokenParser::parseCpp(tokens, linkStrs, namespaces, classes, guard);
 
         m_fileText->setPlainText(text);
 
-        QVector<Token> tokens = tokenizer.tokenize(text);
         QString tokensStr;
         for (const Token &token : tokens)
             tokensStr += QString("%1:  \t%2\n")
@@ -105,13 +105,13 @@ Form2::~Form2()
 {
 }
 
-QVector<Token> Form2::tokenize(const QString &filePath, const FileTokenizer &tokenizer, int &loadingTime, int &tokenizingTime)
+QVector<Token> Form2::tokenize(const QString &filePath, const Tokenizer &tokenizer, int &loadingTime, int &tokenizingTime)
 {
     QElapsedTimer timer;
     timer.start();
     FileData data;
     QString err;
-    const bool isOk = FileParser::readFileData(filePath, data, err);
+    const bool isOk = TokenParser::readFileData(filePath, data, err);
     loadingTime = timer.elapsed();
     Q_ASSERT(isOk);
 

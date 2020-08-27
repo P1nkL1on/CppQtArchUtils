@@ -1,7 +1,7 @@
 #ifndef TEMPLATELOADER_H
 #define TEMPLATELOADER_H
 
-#include "file_parser.h"
+#include "token_parser.h"
 
 #include <QMap>
 

@@ -3,8 +3,9 @@
 
 #include "file_data.h"
 #include "file_link.h"
+#include "token.h"
 
-class FileParser
+class TokenParser
 {
 public:
     static bool readFileData(
@@ -12,9 +13,10 @@ public:
             FileData &data,
             QString &errMessage);
 
-    static void parseHeader(
-            const FileData &data,
-            QVector<FileLink> &links,
+    static void parseCpp(
+            const QVector<Token> &tokens,
+            QStringList &includes,
+            QStringList &namespaces,
             QStringList &classes,
             QString &guard);
 

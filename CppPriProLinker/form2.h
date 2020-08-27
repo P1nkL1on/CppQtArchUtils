@@ -6,7 +6,7 @@
 #include <QListWidget>
 
 class Token;
-class FileTokenizer;
+class Tokenizer;
 
 class Form2 : public QMainWindow
 {
@@ -15,7 +15,7 @@ class Form2 : public QMainWindow
 public:
     Form2(QWidget *parent = nullptr);
     ~Form2();
-    static QVector<Token> tokenize(const QString &filePath, const FileTokenizer &tokenizer, int &loadingTime, int &tokenizingTime);
+    static QVector<Token> tokenize(const QString &filePath, const Tokenizer &tokenizer, int &loadingTime, int &tokenizingTime);
 protected:
     QListWidget *m_filesList = nullptr;
     QPlainTextEdit *m_fileText = nullptr;

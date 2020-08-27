@@ -17,10 +17,11 @@ SOURCES += \
     template_loader.cpp \
     file.cpp \
     file_link.cpp \
-    file_parser.cpp \
     form2.cpp \
-    file_tokenizer.cpp \
-    template_loader_tests.cpp
+    template_loader_tests.cpp \
+    tokenizer.cpp \
+    token_parser.cpp \
+    tokenizer_tests.cpp
 
 HEADERS += \
     form.h \
@@ -33,10 +34,12 @@ HEADERS += \
     file.h \
     file_link.h \
     file_data.h \
-    file_parser.h \
     form2.h \
-    file_tokenizer.h \
-    template_loader_tests.h
+    template_loader_tests.h \
+    token.h \
+    tokenizer.h \
+    token_parser.h \
+    tokenizer_tests.h
 
 RESOURCES += \
     FileTempaltes/filetemplates.qrc \
