@@ -7,33 +7,30 @@ FilePro::FilePro(const QFileInfo &fileInfo) :
 
 FilePro::~FilePro()
 {
-    qDeleteAll(m_vars);
 }
 
-void FilePro::addVar(
-        const QString &condition,
-        const QString &name,
-        const QString &operation,
-        const QString &value)
+void FilePro::addConfig(const ProConfig &config)
 {
-    m_vars << new ProConfig(
-                  condition,
-                  name,
-                  operation,
-                  value);
+    m_config << config;
 }
 
 ProConfig::ProConfig(
         const QString &condition,
         const QString &name,
         const QString &operation,
-        const QString &value) :
+        const QString &value):
     condition(condition),
     name(name),
     opertation(operation),
     value(value)
 {
-    Q_ASSERT(operation.right(1) == "=");
-    Q_ASSERT(not name.isEmpty());
-    Q_ASSERT(not value.isEmpty());
+
+}
+
+bool ProConfig::operator==(const ProConfig &other) const
+{
+    return condition == other.condition
+            and name == other.name
+            and opertation == other.opertation
+            and value == other.value;
 }

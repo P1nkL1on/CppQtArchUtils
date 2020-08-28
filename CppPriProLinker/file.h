@@ -11,11 +11,9 @@ class File
 public:
     explicit File(const QFileInfo &fileInfo);
     virtual ~File();
-    virtual QVector<RefFile> refFiles() const;
-    void addRefToFile(const RefFile &ref);
+    QHash<RefFile, File *> refs;
 protected:
     QFileInfo m_fileInfo;
-    QVector<RefFile> m_refFiles;
 };
 
 #endif // FILE_H

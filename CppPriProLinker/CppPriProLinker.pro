@@ -8,7 +8,9 @@ QMAKE_CXXFLAGS += -std=c++17
 
 SOURCES += \
     file_cpp.cpp \
+    file_cpp_factory.cpp \
     file_pro.cpp \
+    file_pro_factory.cpp \
     guard_converter.cpp \
     guard_converter_tests.cpp \
     lineedit_withhintlist.cpp \
@@ -28,7 +30,10 @@ SOURCES += \
 
 HEADERS += \
     file_cpp.h \
+    file_cpp_factory.h \
+    file_factory.h \
     file_pro.h \
+    file_pro_factory.h \
     form.h \
     guard_converter.h \
     guard_converter_tests.h \

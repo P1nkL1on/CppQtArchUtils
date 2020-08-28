@@ -14,15 +14,14 @@ RefFile::RefFile(
 bool RefFile::operator==(
         const RefFile &other) const
 {
-    return
-            pos == other.pos
+    return pos == other.pos
             and text == other.text
             and isSystem == other.isSystem;
 }
 
 RefFile::operator QString() const
 {
-    return QString("%3(%2) %1%3")
+    return QString("%3(%2) %1")
             .arg(text)
             .arg(pos)
             .arg(isSystem ? "sys " : "");

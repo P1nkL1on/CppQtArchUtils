@@ -8,14 +8,3 @@ FileCpp::FileCpp(const QFileInfo &fileInfo) :
 FileCpp::~FileCpp()
 {
 }
-
-QVector<RefClass> FileCpp::refClasses() const
-{
-    return m_refClasses;
-}
-
-void FileCpp::addRefToClass(const RefClass &ref)
-{
-    if (not m_refClasses.contains(ref))
-        m_refClasses << ref;
-}

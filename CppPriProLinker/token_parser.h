@@ -11,6 +11,7 @@ class ProConfig;
 class TokenParser
 {
 public:
+    // move to filereader utils
     static bool readPlainFileData(
             const QString &filePath,
             PlainFileData &data,
@@ -29,9 +30,10 @@ public:
     static RefClass tokenToRawRef(
             const QStringList &currentBlockStack,
             const Token &token);
-    static void parsePro(const QVector<Token> &tokens,
-            QVector<ProConfig> &configs,
-            QVector<RefFile> &links);
+    static void parsePro(
+            const QVector<Token> &tokens,
+            QVector<RefFile> &links,
+            QVector<ProConfig> &configs);
 };
 
 #endif // FILEPARSER_H

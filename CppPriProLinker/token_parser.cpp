@@ -144,8 +144,8 @@ RefClass TokenParser::classTokenToRawRef(
 
 void TokenParser::parsePro(
         const QVector<Token> &tokens,
-        QVector<ProConfig> &configs,
-        QVector<RefFile> &links)
+        QVector<RefFile> &links,
+        QVector<ProConfig> &configs)
 {
     enum SaveNextTokenAs {
         None = -1, Headers, Sources, Resources, OtherFiles, Include

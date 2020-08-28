@@ -15,6 +15,8 @@ struct ProConfig {
             const QString &name,
             const QString &operation,
             const QString &value);
+    bool operator== (
+            const ProConfig &other) const;
     QString condition;
     QString name;
     QString opertation;
@@ -26,13 +28,9 @@ class FilePro : public File
 public:
     explicit FilePro(const QFileInfo &fileInfo);
     ~FilePro() override;
-    void addVar(
-            const QString &condition,
-            const QString &name,
-            const QString &operation,
-            const QString &value);
+    void addConfig(const ProConfig &config);
 protected:
-    QVector<ProConfig *> m_vars;
+    QVector<ProConfig> m_config;
 };
 
 

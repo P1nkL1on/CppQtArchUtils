@@ -13,8 +13,7 @@ RefClass::RefClass(
 bool RefClass::operator==(
         const RefClass &other) const
 {
-    return
-            pos == other.pos
+    return pos == other.pos
             and name == other.name
             and namespaces == other.namespaces;
 }
