@@ -22,8 +22,8 @@ bool RefFile::operator==(
 
 RefFile::operator QString() const
 {
-    return QString("(%2) %1%3")
+    return QString("%3(%2) %1%3")
             .arg(text)
             .arg(pos)
-            .arg(isSystem ? ", system" : "");
+            .arg(isSystem ? "sys " : "");
 }

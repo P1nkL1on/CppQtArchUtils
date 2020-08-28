@@ -28,12 +28,39 @@ bool TokenParser::readPlainFileData(
     return true;
 }
 
+
+const QStringList blockIdentifiers {
+    "namespace", "class", "struct", "enum"
+};
+const QStringList cppKeyWords {
+    "asm", "auto", "bool", "break", "case",
+    "catch", "char", "class", "const",
+    "continue", "default", "delete", "do",
+    "double", "else", "enum", "explicit",
+    "export", "extern", "false", "float", "for",
+    "friend", "goto", "if", "inline", "int",
+    "long", "mutable", "namespace", "new", "operator",
+    "private", "protected," "public", "register",
+    "return", "short", "signed", "sizeof", "static",
+    "struct", "switch", "template", "this",
+    "throw", "true", "try", "typedef", "typename",
+    "union", "unsigned", "using", "virtual", "void",
+    "volatile", "wchar_t", "while", "and", "or", "not"
+};
+
 void TokenParser::parseCpp(
         const QVector<Token> &tokens,
         QVector<RefFile> &includes,
         QVector<RefClass> &classes,
         QString &guard)
 {
+    // todo add remember deepest namespacing
+    // and trat it as a namespace for no-class contains files
+    // ex: any utils with funcs in namespaces
+
+    // separate exact namespaces (when defining entities)
+    // and maybenamespaces in all other cases
+
     const QVector<CppTokenType> skipTokens {
         CppTokenType::AreaComment,
         CppTokenType::LineComment,
@@ -43,7 +70,6 @@ void TokenParser::parseCpp(
     enum SaveNextTokenAs {
         None, Namespace, Class, Guard
     };
-    const QStringList blockIdentifiers {"namespace", "class", "struct", "enum"};
     QStringList currentBlockStack;
     QString lastBlockName;
     int currentBlockDepth = 0;
@@ -77,8 +103,9 @@ void TokenParser::parseCpp(
                 saveNextAs = blockIdentifiers.indexOf(token.text) ? Class : Namespace;
                 continue;
             }
-            if (saveNextAs == None)
+            if (saveNextAs == None){
                 continue;
+            }
             if (saveNextAs == Guard){
                 guard = token.text;
                 saveNextAs = None;
@@ -86,7 +113,7 @@ void TokenParser::parseCpp(
             }
             lastBlockName = token.text;
             if (saveNextAs == Class)
-                classes << nameTokenToRawRef(currentBlockStack, token);
+                classes << classTokenToRawRef(currentBlockStack, token);
             saveNextAs = None;
             continue;
         default:
@@ -104,14 +131,15 @@ RefFile TokenParser::includeTokenToRawRef(
     return RefFile(token.pos, linkText, isSystem);
 }
 
-RefClass TokenParser::nameTokenToRawRef(
+RefClass TokenParser::classTokenToRawRef(
         const QStringList &currentBlockStack,
         const Token &token)
 {
     QStringList nameScopes = currentBlockStack;
     nameScopes << token.text.split("::");
     const QString name = nameScopes.takeLast();
-    return RefClass(token.pos + token.text.indexOf(name), name, nameScopes, true);
+    const int pos = token.pos + token.text.indexOf(name);
+    return RefClass(pos, name, nameScopes);
 }
 
 void TokenParser::parsePro(

@@ -24,10 +24,11 @@ public:
 
     static RefFile includeTokenToRawRef(
             const Token &token);
-    static RefClass nameTokenToRawRef(
+    static RefClass classTokenToRawRef(const QStringList &currentBlockStack,
+            const Token &token);
+    static RefClass tokenToRawRef(
             const QStringList &currentBlockStack,
             const Token &token);
-
     static void parsePro(
             const FileData &data,
             QVector<RefFile> &links);

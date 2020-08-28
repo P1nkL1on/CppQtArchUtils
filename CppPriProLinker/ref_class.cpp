@@ -3,12 +3,10 @@
 RefClass::RefClass(
         const int pos,
         const QString &name,
-        const QStringList &namespaces,
-        bool definition) :
+        const QStringList &namespaces) :
     pos(pos),
     name(name),
-    namespaces(namespaces),
-    definition(definition)
+    namespaces(namespaces)
 {
 }
 
@@ -18,16 +16,14 @@ bool RefClass::operator==(
     return
             pos == other.pos
             and name == other.name
-            and namespaces == other.namespaces
-            and definition == other.definition;
+            and namespaces == other.namespaces;
 }
 
 RefClass::operator QString() const
 {
     QStringList tmp = namespaces;
     tmp << name;
-    return QString("(%2) %1 %3")
+    return QString("(%2) %1")
             .arg(tmp.join("::"))
-            .arg(pos)
-            .arg(definition ? "define" : "");
+            .arg(pos);
 }
