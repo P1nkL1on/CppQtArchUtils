@@ -9,15 +9,16 @@
 // in token_parser
 
 struct ProConfig {
+    ProConfig() = default;
     ProConfig(
             const QString &condition,
             const QString &name,
             const QString &operation,
-            const QStringList &values);
+            const QString &value);
     QString condition;
     QString name;
     QString opertation;
-    QStringList values;
+    QString value;
 };
 
 class FilePro : public File
@@ -29,7 +30,7 @@ public:
             const QString &condition,
             const QString &name,
             const QString &operation,
-            const QStringList &values);
+            const QString &value);
 protected:
     QVector<ProConfig *> m_vars;
 };

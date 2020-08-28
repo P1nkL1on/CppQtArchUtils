@@ -63,12 +63,12 @@ void TokenParser::parseCpp(
 
     const QVector<CppTokenType> skipTokens {
         CppTokenType::AreaComment,
-        CppTokenType::LineComment,
-        CppTokenType::Qoute,
-        CppTokenType::Char
+                CppTokenType::LineComment,
+                CppTokenType::Qoute,
+                CppTokenType::Char
     };
     enum SaveNextTokenAs {
-        None, Namespace, Class, Guard
+        None = -1, Namespace, Class, Guard
     };
     QStringList currentBlockStack;
     QString lastBlockName;
@@ -143,8 +143,39 @@ RefClass TokenParser::classTokenToRawRef(
 }
 
 void TokenParser::parsePro(
-        const FileData &data,
+        const QVector<Token> &tokens,
+        QVector<ProConfig> &configs,
         QVector<RefFile> &links)
 {
+    enum SaveNextTokenAs {
+        None = -1, Headers, Sources, Resources, OtherFiles, Include
+    };
+    const QStringList listBlockNames {
+        "HEADERS", "SOURCES", "RESOURCES", "OTHERFILES", "include"
+    };
+    SaveNextTokenAs saveNextAs = None;
 
+    for (const Token &token : tokens)
+        switch (token.type) {
+        case int(ProTokenType::LineBreak):
+            saveNextAs = None;
+            continue;
+        case int(ProTokenType::Operator):
+            continue;
+        case int(ProTokenType::Identifer):
+            switch (saveNextAs) {
+            case None:
+                saveNextAs = SaveNextTokenAs(listBlockNames.indexOf(token.text));
+                continue;
+            case Include:
+                links << RefFile(token.pos, token.text);
+                saveNextAs = None;
+                continue;
+            default:
+                links << RefFile(token.pos, token.text);
+                continue;
+            }
+        default:
+            continue;
+        }
 }

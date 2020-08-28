@@ -14,26 +14,26 @@ void FilePro::addVar(
         const QString &condition,
         const QString &name,
         const QString &operation,
-        const QStringList &values)
+        const QString &value)
 {
     m_vars << new ProConfig(
                   condition,
                   name,
                   operation,
-                  values);
+                  value);
 }
 
 ProConfig::ProConfig(
         const QString &condition,
         const QString &name,
         const QString &operation,
-        const QStringList &values) :
+        const QString &value) :
     condition(condition),
     name(name),
     opertation(operation),
-    values(values)
+    value(value)
 {
     Q_ASSERT(operation.right(1) == "=");
     Q_ASSERT(not name.isEmpty());
-    Q_ASSERT(not values.isEmpty());
+    Q_ASSERT(not value.isEmpty());
 }

@@ -7,6 +7,8 @@ class File;
 
 struct RefClass
 {
+    // todo separate to exact namespaces
+    // and possible namespaces
     RefClass() = default;
     RefClass(const int pos,
              const QString &name,

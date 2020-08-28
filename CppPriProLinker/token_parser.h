@@ -29,8 +29,8 @@ public:
     static RefClass tokenToRawRef(
             const QStringList &currentBlockStack,
             const Token &token);
-    static void parsePro(
-            const FileData &data,
+    static void parsePro(const QVector<Token> &tokens,
+            QVector<ProConfig> &configs,
             QVector<RefFile> &links);
 };
 
