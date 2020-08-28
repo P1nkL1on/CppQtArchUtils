@@ -69,11 +69,13 @@ Tokenizer Tokenizer::proTokenizer()
 {
     const QMap<int, QString> regExpMap {
         {int(ProTokenType::Comment), "#[^\n]*"},
-        {int(ProTokenType::NewLine), "(?!\\\\)(\\s*)\\n"},
         {int(ProTokenType::CurlyOpen),   "\\{"},
         {int(ProTokenType::CurlyClose),  "\\}"},
-        {int(ProTokenType::Identifer),   "([a-zA-Z_][a-zA-Z_:0-9]*)"},
-        {int(ProTokenType::Colon),   ":"},
+        {int(ProTokenType::LineContinue),  "\\\\(\\s*)\\n"},
+        {int(ProTokenType::LineBreak),  "((\\n)+)"},
+        {int(ProTokenType::Operator),   "([-+*\\\\/=]?=)"},
+        {int(ProTokenType::Case), "[\\w .,!:\\(\\)]+(:|(\\s*(?=\\{)))"},
+        {int(ProTokenType::Identifer),   "([a-zA-Z0-9_\\/\\$\\.\\{\\}-+=]+)"},
     };
     return regExpMapToTokenizer(regExpMap);
 }

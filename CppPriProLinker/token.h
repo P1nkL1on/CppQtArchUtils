@@ -22,11 +22,13 @@ enum class ProTokenType
 {
     None = -1,
     Comment = 0,
+    Case,
     CurlyOpen,
     CurlyClose,
-    Colon,
+    Operator,
+    LineContinue,
+    LineBreak,
     Identifer,
-    NewLine,
 };
 
 struct Token

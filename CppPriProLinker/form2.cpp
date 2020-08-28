@@ -27,8 +27,7 @@ Form2::Form2(QWidget *parent) :
 
     Tokenizer tokenizer = Tokenizer::proTokenizer();
     QDirIterator dirIterator(
-                // "/home/alex/R3DS/Prohor",
-                "/home/alex/jff/",
+                "",
                 QStringList{"*.pro"},
                 QDir::Files,
                 QDirIterator::Subdirectories);
@@ -64,10 +63,10 @@ Form2::Form2(QWidget *parent) :
         }
         const QVector<Token> tokens = tokenizer.tokenize(text);
 
-        QString guard;
-        QStringList linkStrs;
-        QStringList classes;
-        TokenParser::parseCpp(tokens, linkStrs, classes, guard);
+//        QString guard;
+//        QStringList linkStrs;
+//        QStringList classes;
+//        TokenParser::parseCpp(tokens, linkStrs, classes, guard);
 
         m_fileText->setPlainText(text);
 
@@ -77,10 +76,10 @@ Form2::Form2(QWidget *parent) :
                     .arg(int(token.type))
                     .arg(token.text);
 
-        m_resultText->setPlainText(QString("Guard: %1\n\nLinks:\n    %2\nClasses:\n    %3")
-                                   .arg(guard)
-                                   .arg(linkStrs.join("\n    "))
-                                   .arg(classes.join("\n    ")));
+//        m_resultText->setPlainText(QString("Guard: %1\n\nLinks:\n    %2\nClasses:\n    %3")
+//                                   .arg(guard)
+//                                   .arg(linkStrs.join("\n    "))
+//                                   .arg(classes.join("\n    ")));
         m_tokenText->setPlainText(tokensStr);
     });
 
