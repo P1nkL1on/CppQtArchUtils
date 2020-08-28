@@ -3,7 +3,7 @@
 
 #include <QString>
 
-enum class TokenType
+enum class CppTokenType
 {
     None = -1,
     AreaComment = 0,
@@ -16,6 +16,17 @@ enum class TokenType
     CurlyClose,
     SemiColon,
     Identifer,
+};
+
+enum class ProTokenType
+{
+    None = -1,
+    Comment = 0,
+    CurlyOpen,
+    CurlyClose,
+    Colon,
+    Identifer,
+    NewLine,
 };
 
 struct Token

@@ -17,7 +17,7 @@ public:
             const PlainFileData &plainData,
             const QVector<QRegExp> &tokenRegExpPatterns);
     static Tokenizer headerTokenizer();
-    static Tokenizer priTokenizer();
+    static Tokenizer proTokenizer();
 protected:
     static Tokenizer regExpMapToTokenizer(
             const QMap<int, QString> &regExpMap);

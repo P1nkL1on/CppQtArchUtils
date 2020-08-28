@@ -51,26 +51,29 @@ QVector<Token> Tokenizer::tokenize
 Tokenizer Tokenizer::headerTokenizer()
 {
     const QMap<int, QString> regExpMap {
-        {int(TokenType::Include),     "#include((\\s*)((<([^>]*)>|\"([^\"]*)\")))"},
-        {int(TokenType::Directive),   "#(\\S*)(()|([^\\s+]*))"},
-        {int(TokenType::AreaComment), "\\/\\*([^*]|\\*(?!\\/))*\\*\\/"},
-        {int(TokenType::Char),        "\'(\\\\?[^\'\\n]|\\\\\')\'?"},
-        {int(TokenType::Qoute),       "\"([^\"\\n]|\\\\\")*\"?"},
-        {int(TokenType::LineComment), "\\/\\/[^\n]*"},
-        {int(TokenType::CurlyOpen),   "\\{"},
-        {int(TokenType::CurlyClose),  "\\}"},
-        {int(TokenType::SemiColon),   ";"},
-        {int(TokenType::Identifer),   "([a-zA-Z_][a-zA-Z_:0-9]*)"}
+        {int(CppTokenType::Include),     "#include((\\s*)((<([^>]*)>|\"([^\"]*)\")))"},
+        {int(CppTokenType::Directive),   "#(\\S*)(()|([^\\s+]*))"},
+        {int(CppTokenType::AreaComment), "\\/\\*([^*]|\\*(?!\\/))*\\*\\/"},
+        {int(CppTokenType::Char),        "\'(\\\\?[^\'\\n]|\\\\\')\'?"},
+        {int(CppTokenType::Qoute),       "\"([^\"\\n]|\\\\\")*\"?"},
+        {int(CppTokenType::LineComment), "\\/\\/[^\n]*"},
+        {int(CppTokenType::CurlyOpen),   "\\{"},
+        {int(CppTokenType::CurlyClose),  "\\}"},
+        {int(CppTokenType::SemiColon),   ";"},
+        {int(CppTokenType::Identifer),   "([a-zA-Z_][a-zA-Z_:0-9]*)"}
     };
     return regExpMapToTokenizer(regExpMap);
 }
 
-Tokenizer Tokenizer::priTokenizer()
+Tokenizer Tokenizer::proTokenizer()
 {
     const QMap<int, QString> regExpMap {
-        {int(TokenType::LineComment), "#[^\n]*"},
-        {int(TokenType::CurlyOpen),   "\\{"},
-        {int(TokenType::CurlyClose),  "\\}"}
+        {int(ProTokenType::Comment), "#[^\n]*"},
+        {int(ProTokenType::NewLine), "(?!\\\\)(\\s*)\\n"},
+        {int(ProTokenType::CurlyOpen),   "\\{"},
+        {int(ProTokenType::CurlyClose),  "\\}"},
+        {int(ProTokenType::Identifer),   "([a-zA-Z_][a-zA-Z_:0-9]*)"},
+        {int(ProTokenType::Colon),   ":"},
     };
     return regExpMapToTokenizer(regExpMap);
 }

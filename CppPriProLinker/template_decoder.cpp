@@ -138,15 +138,14 @@ void TemplateDecoder::replaceVars(FileData &data, const QHash<QString, QString> 
     }
 }
 
-TemplateDecoder TemplateDecoder::priDecoder(
-        const QStringList &priRelativePathes,
+TemplateDecoder TemplateDecoder::proDecoder(const QStringList &proRelativePathes,
         const QStringList &headerRelativePathes,
         const QStringList &sourceRelativePathes,
         const QStringList &resourceRelativePathes,
         int tabSpaceCount,
         bool skipEmptyBlocks,
         int newLinesBetweenBlocks,
-        bool usePriPWD,
+        bool useProPWD,
         bool useCppPWD)
 {
     TemplateDecoder decoder;
@@ -200,7 +199,7 @@ TemplateDecoder TemplateDecoder::priDecoder(
             decoder.setVariableToTemplate("$PRIS", QStringList());
             return;
         }
-        const QString pwdStr = usePriPWD ? "$$PWD/" : "";
+        const QString pwdStr = useProPWD ? "$$PWD/" : "";
         QStringList priTemplate {
             "$REPEAT",
             QString("include(%1$PRI_RELATIVE_PATHES)").arg(pwdStr),
@@ -211,7 +210,7 @@ TemplateDecoder TemplateDecoder::priDecoder(
         decoder.setVariableToTemplate("$PRIS", priTemplate);
         decoder.setVariableToStringList("$PRI_RELATIVE_PATHES", priRelativePathes);
     };
-    addPris(priRelativePathes);
+    addPris(proRelativePathes);
 
     // MISC OPTIONS
     // todo move it to the inner method of decoder

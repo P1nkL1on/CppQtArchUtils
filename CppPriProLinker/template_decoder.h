@@ -43,15 +43,15 @@ public:
     void setVariableToTemplate(
             const QString &varName,
             const FileData &templateValue);
-    static TemplateDecoder priDecoder(
-            const QStringList &priRelativePathes,
+    static TemplateDecoder proDecoder(
+            const QStringList &proRelativePathes,
             const QStringList &headerRelativePathes,
             const QStringList &sourceRelativePathes,
             const QStringList &resourceRelativePathes,
             int tabSpaceCount = 4,
             bool skipEmptyBlocks = true,
             int newLinesBetweenBlocks = 1,
-            bool usePriPWD = true,
+            bool useProPWD = true,
             bool useCppPWD = false);
 protected:
     QHash<QString, FileData> m_variableToTempalteHash;

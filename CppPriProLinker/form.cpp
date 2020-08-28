@@ -68,13 +68,14 @@ Form::~Form()
 
 void Form::updatePreview()
 {
-    FileData data;
+    PlainFileData plainData;
     QString err;
-    m_loader.readTemplate("pri", data, err);
+    m_loader.readTemplate("pri", plainData, err);
     if (not err.isEmpty()){
         QMessageBox::warning(this, "File Loading Failed", err);
         return;
     }
+    const FileData data = plainData.split("\n");
 
     const QStringList pris {
         "PriAlpha.pri", "PriBeta.pri", "PriAnother.pri"
@@ -87,7 +88,7 @@ void Form::updatePreview()
     };
     const QStringList resources {
     };
-    m_decoder = TemplateDecoder::priDecoder(
+    m_decoder = TemplateDecoder::proDecoder(
                 pris,
                 headers,
                 sources,

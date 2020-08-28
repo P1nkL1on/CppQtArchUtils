@@ -15,44 +15,44 @@ TemplateLoaderTests::~TemplateLoaderTests()
 
 void TemplateLoaderTests::readEmptyFile()
 {
-    FileData data;
+    PlainFileData data;
     QString errMsg;
-    QVERIFY(TokenParser::readFileData(":/empty.txt", data, errMsg));
+    QVERIFY(TokenParser::readPlainFileData(":/empty.txt", data, errMsg));
     QCOMPARE(errMsg, QString());
-    QCOMPARE(data, QStringList());
+    QCOMPARE(data, PlainFileData());
 }
 
 void TemplateLoaderTests::readMultiLine()
 {
-    FileData data;
+    PlainFileData data;
     QString errMsg;
-    QVERIFY(TokenParser::readFileData(":/multiline.txt", data, errMsg));
+    QVERIFY(TokenParser::readPlainFileData(":/multiline.txt", data, errMsg));
     QCOMPARE(errMsg, QString());
-    const QStringList expectedData = {
-        "usuall line",
-        "\ttabbed line",
-        "",
-        "^ empty line",
-        "\t\t\t\t\t",
-        "^ tabbled empty line",
+    const PlainFileData expectedData(
+        "usuall line\n"
+        "\ttabbed line\n"
+        "\n"
+        "^ empty line\n"
+        "\t\t\t\t\t\n"
+        "^ tabbled empty line\n"
         "\tv also empty"
-    };
+    );
     QCOMPARE(data, expectedData);
 }
 
 void TemplateLoaderTests::readOneLine()
 {
-    FileData data;
+    PlainFileData data;
     QString errMsg;
-    QVERIFY(TokenParser::readFileData(":/oneline.txt", data, errMsg));
+    QVERIFY(TokenParser::readPlainFileData(":/oneline.txt", data, errMsg));
     QCOMPARE(errMsg, QString());
-    QCOMPARE(data, QStringList{"\tany one line\t  \t"});
+    QCOMPARE(data, PlainFileData("\tany one line\t  \t"));
 }
 
 void TemplateLoaderTests::readUnexist()
 {
-    FileData data;
+    PlainFileData data;
     QString errMsg;
-    QVERIFY(not TokenParser::readFileData(":/none.txt", data, errMsg));
+    QVERIFY(not TokenParser::readPlainFileData(":/none.txt", data, errMsg));
     QVERIFY(not errMsg.isEmpty());
 }

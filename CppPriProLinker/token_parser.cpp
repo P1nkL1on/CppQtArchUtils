@@ -4,9 +4,9 @@
 #include <QFileInfo>
 #include <QVector>
 
-bool TokenParser::readFileData(
+bool TokenParser::readPlainFileData(
         const QString &filePath,
-        FileData &data,
+        PlainFileData &data,
         QString &errMessage)
 {
     QFileInfo info(filePath);
@@ -14,15 +14,14 @@ bool TokenParser::readFileData(
         errMessage = QString("File doen't exist! %1").arg(filePath);
         return false;
     }
-
     QFile file(filePath);
     if (not file.open(QIODevice::ReadOnly)){
         errMessage = QString("File can't be readen! %1").arg(filePath);
         return false;
     }
-    while (not file.atEnd())
-        data << QString(file.readLine()).replace("\r\n", "");
+    const QByteArray byteData = file.readAll();
     file.close();
+    data = QString(byteData);
     errMessage = QString();
     return true;
 }
@@ -33,11 +32,11 @@ void TokenParser::parseCpp(
         QStringList &classes,
         QString &guard)
 {
-    const QVector<TokenType> skipTokens {
-        TokenType::AreaComment,
-        TokenType::LineComment,
-        TokenType::Qoute,
-        TokenType::Char
+    const QVector<CppTokenType> skipTokens {
+        CppTokenType::AreaComment,
+        CppTokenType::LineComment,
+        CppTokenType::Qoute,
+        CppTokenType::Char
     };
     enum SaveNextTokenAs {
         None, Namespace, Class, Guard
@@ -51,28 +50,28 @@ void TokenParser::parseCpp(
 
     for (const Token &token : tokens)
         switch (token.type) {
-        case int(TokenType::SemiColon):
+        case int(CppTokenType::SemiColon):
             lastBlockName.clear();
             continue;
-        case int(TokenType::CurlyOpen):
+        case int(CppTokenType::CurlyOpen):
             if (not lastBlockName.isEmpty())
                 currentBlockStack << lastBlockName;
             lastBlockName.clear();
             ++currentBlockDepth;
             continue;
-        case int(TokenType::CurlyClose):
+        case int(CppTokenType::CurlyClose):
             if (currentBlockDepth < currentBlockStack.length())
                 currentBlockStack.removeLast();
             --currentBlockDepth;
             continue;
-        case int(TokenType::Include):
+        case int(CppTokenType::Include):
             includes << token.text.split(spaceRegExp, QString::SkipEmptyParts).last();
             continue;
-        case int(TokenType::Directive):
+        case int(CppTokenType::Directive):
             if (saveNextAs == None and token.text == "#ifndef")
                 saveNextAs = Guard;
             continue;
-        case int(TokenType::Identifer):
+        case int(CppTokenType::Identifer):
             if (blockIdentifiers.contains(token.text)){
                 saveNextAs = blockIdentifiers.indexOf(token.text) ? Class : Namespace;
                 continue;
@@ -97,7 +96,7 @@ void TokenParser::parseCpp(
         }
 }
 
-void TokenParser::parsePri(
+void TokenParser::parsePro(
         const FileData &data,
         QVector<FileLink> &links)
 {

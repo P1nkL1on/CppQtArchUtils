@@ -11,7 +11,7 @@ public:
     TemplateLoader(
             const QMap<QString, QString> &templateNameToPathMap = {});
     QStringList templateNamesList() const;
-    bool readTemplate(const QString &templateName, FileData &data, QString &errMessage) const;
+    bool readTemplate(const QString &templateName, PlainFileData &data, QString &errMessage) const;
 protected:
     QMap<QString, QString> m_templateNameToPathMap;
     bool hasTemplate(const QString &templateName) const;

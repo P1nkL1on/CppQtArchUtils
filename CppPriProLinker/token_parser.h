@@ -5,12 +5,13 @@
 #include "file_link.h"
 #include "token.h"
 
+
 class TokenParser
 {
 public:
-    static bool readFileData(
+    static bool readPlainFileData(
             const QString &filePath,
-            FileData &data,
+            PlainFileData &data,
             QString &errMessage);
 
     static void parseCpp(const QVector<Token> &tokens,
@@ -18,7 +19,7 @@ public:
             QStringList &classes,
             QString &guard);
 
-    static void parsePri(
+    static void parsePro(
             const FileData &data,
             QVector<FileLink> &links);
 };
