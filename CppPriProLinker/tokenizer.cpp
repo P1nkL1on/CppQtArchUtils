@@ -18,68 +18,64 @@ QVector<Token> Tokenizer::tokenize
 (const PlainFileData &plainData,
             const QVector<QRegExp> &tokenRegExpPatterns)
 {
-    int currentInd = 0;
+    int currentPos = 0;
     QVector<Token> res;
     QVector<int> cacheTokenPos(tokenRegExpPatterns.size(), -1);
-    while (currentInd < plainData.size()){
-        TokenType nextType = None;
-        int minNextInd = plainData.size();
+    while (currentPos < plainData.size()){
+        int nextInd= -1;
+        int minNextPos = plainData.size();
         for (int typeInd = 0; typeInd < tokenRegExpPatterns.size(); ++typeInd){
-            const TokenType tokenType = TokenType(typeInd);
-            const QRegExp &reg = tokenRegExpPatterns[tokenType];
-            int nextInd = cacheTokenPos[tokenType];
-            if (nextInd < currentInd){
-                nextInd = reg.indexIn(plainData, currentInd);
-                cacheTokenPos[tokenType] = nextInd;
+            const QRegExp &reg = tokenRegExpPatterns[typeInd];
+            int nextPos = cacheTokenPos[typeInd];
+            if (nextPos < currentPos){
+                nextPos = reg.indexIn(plainData, currentPos);
+                cacheTokenPos[typeInd] = nextPos;
             }
-            if (nextInd >= currentInd and nextInd < minNextInd){
-                minNextInd = nextInd;
-                nextType = tokenType;
+            if (nextPos >= currentPos and nextPos < minNextPos){
+                minNextPos = nextPos;
+                nextInd = typeInd;
             }
-            if (nextInd == currentInd)
+            if (nextPos == currentPos)
                 break;
         }
-        if (nextType == None)
+        if (nextInd == -1)
             break;
-        const int length = tokenRegExpPatterns[nextType].matchedLength();
-        const QString tokenText = plainData.mid(minNextInd, length);
-        res << Token(nextType, tokenText);
-        currentInd = minNextInd + length;
+        const int length = tokenRegExpPatterns[int(nextInd)].matchedLength();
+        const QString tokenText = plainData.mid(minNextPos, length);
+        res << Token(minNextPos, nextInd, tokenText);
+        currentPos = minNextPos + length;
     }
     return res;
 }
 
 Tokenizer Tokenizer::headerTokenizer()
 {
-    // todo
-    // before tokenizing remove comments, qoutes and chars in text
-    const QMap<TokenType, QString> regExpMap {
-        {StructBlockOpen,    "((namespace(\\s+)([a-zA-Z_][a-zA-Z_:0-9]*)(\\s*)\\{))|" // namespace A::B {
-                             "((class|struct)(\\s+)([a-zA-Z_][a-zA-Z_:0-9]*)"         // class_%name%
-                             "(\\s*)(:[^\\{]*)?\\{)"},                                // : public %base_class_name% {
-        {Directive,   "#(\\S*)((\\s*)((<([^>]*)>|\"([^\"]*)\"))|"   // #dir <%something>, #dir "okey"
-                      "()|([^\\s+]*))"},                            // #dir Any Other Text, #endif
-        {AreaComment, "\\/\\*([^*]|\\*(?!\\/))*\\*\\/"},
-        {Char,        "\'(\\\\?[^\'\\n]|\\\\\')\'?"},
-        {Qoute,       "\"([^\"\\n]|\\\\\")*\"?"},
-        {LineComment, "\\/\\/[^\n]*"},
-        {BlockOpen,   "\\{"},
-        {BlockClose,  "\\}"}
+    const QMap<int, QString> regExpMap {
+        {int(TokenType::Include),     "#include((\\s*)((<([^>]*)>|\"([^\"]*)\")))"},
+        {int(TokenType::Directive),   "#(\\S*)(()|([^\\s+]*))"},
+        {int(TokenType::AreaComment), "\\/\\*([^*]|\\*(?!\\/))*\\*\\/"},
+        {int(TokenType::Char),        "\'(\\\\?[^\'\\n]|\\\\\')\'?"},
+        {int(TokenType::Qoute),       "\"([^\"\\n]|\\\\\")*\"?"},
+        {int(TokenType::LineComment), "\\/\\/[^\n]*"},
+        {int(TokenType::CurlyOpen),   "\\{"},
+        {int(TokenType::CurlyClose),  "\\}"},
+        {int(TokenType::SemiColon),   ";"},
+        {int(TokenType::Identifer),   "([a-zA-Z_][a-zA-Z_:0-9]*)"}
     };
     return regExpMapToTokenizer(regExpMap);
 }
 
 Tokenizer Tokenizer::priTokenizer()
 {
-    const QMap<TokenType, QString> regExpMap {
-        {LineComment, "#[^\n]*"},
-        {BlockOpen,   "\\{"},
-        {BlockClose,  "\\}"}
+    const QMap<int, QString> regExpMap {
+        {int(TokenType::LineComment), "#[^\n]*"},
+        {int(TokenType::CurlyOpen),   "\\{"},
+        {int(TokenType::CurlyClose),  "\\}"}
     };
     return regExpMapToTokenizer(regExpMap);
 }
 
-Tokenizer Tokenizer::regExpMapToTokenizer(const QMap<TokenType, QString> &regExpMap)
+Tokenizer Tokenizer::regExpMapToTokenizer(const QMap<int, QString> &regExpMap)
 {
     QVector<QRegExp> tokenRegExpPatterns;
     for (const QString &pattern : regExpMap)

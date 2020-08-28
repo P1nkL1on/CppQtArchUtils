@@ -30,48 +30,71 @@ bool TokenParser::readFileData(
 void TokenParser::parseCpp(
         const QVector<Token> &tokens,
         QStringList &includes,
-        QStringList &namespaces,
         QStringList &classes,
         QString &guard)
 {
     const QVector<TokenType> skipTokens {
-        AreaComment, LineComment, Qoute, Char
+        TokenType::AreaComment,
+        TokenType::LineComment,
+        TokenType::Qoute,
+        TokenType::Char
+    };
+    enum SaveNextTokenAs {
+        None, Namespace, Class, Guard
     };
     const QRegExp spaceRegExp("(\\s|\\{)+");
-    QStringList currentNamespaces;
+    const QStringList blockIdentifiers {"namespace", "class", "struct", "enum"};
+    QStringList currentBlockStack;
+    QString lastBlockName;
     int currentBlockDepth = 0;
-    for (const Token &token : tokens){
-        if (skipTokens.contains(token.type))
+    SaveNextTokenAs saveNextAs = None;
+
+    for (const Token &token : tokens)
+        switch (token.type) {
+        case int(TokenType::SemiColon):
+            lastBlockName.clear();
             continue;
-        if (token.type == BlockOpen){
+        case int(TokenType::CurlyOpen):
+            if (not lastBlockName.isEmpty())
+                currentBlockStack << lastBlockName;
+            lastBlockName.clear();
             ++currentBlockDepth;
             continue;
-        }
-        if (token.type == BlockClose){
-            if (currentBlockDepth < currentNamespaces.length())
-                currentNamespaces.removeLast();
+        case int(TokenType::CurlyClose):
+            if (currentBlockDepth < currentBlockStack.length())
+                currentBlockStack.removeLast();
             --currentBlockDepth;
             continue;
-        }
-        const QStringList splitedToken = token.text.trimmed()
-                .split(spaceRegExp, QString::SkipEmptyParts);
-        const QString value = splitedToken.size() > 1 ?
-                    splitedToken[1] : QString();
-        if (token.type == Directive){
-            if (splitedToken.first() == "#include")
-                includes << value;
-            else if (guard.isEmpty() and splitedToken.first() == "#ifndef")
-                guard = value;
-        } else if (token.type == StructBlockOpen){
-            currentNamespaces << value;
-            ++currentBlockDepth;
-            if (not namespaces.contains(value) and splitedToken.first() == "namespace"){
-                namespaces << value;
-            } else {
-                classes << currentNamespaces.join("::");
+        case int(TokenType::Include):
+            includes << token.text.split(spaceRegExp, QString::SkipEmptyParts).last();
+            continue;
+        case int(TokenType::Directive):
+            if (saveNextAs == None and token.text == "#ifndef")
+                saveNextAs = Guard;
+            continue;
+        case int(TokenType::Identifer):
+            if (blockIdentifiers.contains(token.text)){
+                saveNextAs = blockIdentifiers.indexOf(token.text) ? Class : Namespace;
+                continue;
             }
+            if (saveNextAs == None)
+                continue;
+            if (saveNextAs == Guard){
+                guard = token.text;
+                saveNextAs = None;
+                continue;
+            }
+            lastBlockName = token.text;
+            if (saveNextAs == Class){
+                QStringList fullBlockStack = currentBlockStack;
+                fullBlockStack << token.text;
+                classes << fullBlockStack.join("::");
+            }
+            saveNextAs = None;
+            continue;
+        default:
+            continue;
         }
-    }
 }
 
 void TokenParser::parsePri(

@@ -24,7 +24,7 @@ protected:
             const PlainFileData &data);
         Tokenizer tokenizer;
         QVector<Token> cachedTokens;
-        QVector<TokenType> cachedTypes;
+        QVector<int> cachedTypes;
         QStringList cachedTexts;
     };
 };

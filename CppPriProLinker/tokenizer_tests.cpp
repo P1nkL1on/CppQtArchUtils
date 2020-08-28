@@ -50,9 +50,8 @@ void TokenizerTests::headerCommentsMasking()
     const QStringList expectedTokenTexts {
         "#1", "// #2", "//", "#3", "// #4", "#5", "/* #6\n#7\n#8 */", "#9"
     };
-    const QVector<TokenType> expectedTokenTypes {
-        Directive, LineComment, LineComment, Directive,
-        LineComment, Directive, AreaComment, Directive
+    const QVector<int> expectedTokenTypes {
+        5, 1, 1, 5, 1, 5, 0, 5
     };
     QCOMPARE(t.cachedTexts, expectedTokenTexts);
     QCOMPARE(t.cachedTypes, expectedTokenTypes);

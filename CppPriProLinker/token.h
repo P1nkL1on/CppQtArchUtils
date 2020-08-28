@@ -3,25 +3,28 @@
 
 #include <QString>
 
-enum TokenType
+enum class TokenType
 {
     None = -1,
     AreaComment = 0,
     LineComment,
     Qoute,
     Char,
+    Include,
     Directive,
-    BlockOpen,
-    BlockClose,
-    StructBlockOpen
+    CurlyOpen,
+    CurlyClose,
+    SemiColon,
+    Identifer,
 };
 
 struct Token
 {
     Token() = default;
-    Token(TokenType type, const QString &text) :
-        type(type), text(text) {}
-    TokenType type = None;
+    Token(int pos, int type, const QString &text) :
+        pos(pos), type(type), text(text) {}
+    int pos = -1;
+    int type = -1;
     QString text;
 };
 

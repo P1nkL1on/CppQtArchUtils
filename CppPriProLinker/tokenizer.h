@@ -20,7 +20,7 @@ public:
     static Tokenizer priTokenizer();
 protected:
     static Tokenizer regExpMapToTokenizer(
-            const QMap<TokenType, QString> &regExpMap);
+            const QMap<int, QString> &regExpMap);
     QVector<QRegExp> m_tokenRegExpPatterns;
 
 };

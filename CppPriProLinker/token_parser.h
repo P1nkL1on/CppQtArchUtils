@@ -13,10 +13,8 @@ public:
             FileData &data,
             QString &errMessage);
 
-    static void parseCpp(
-            const QVector<Token> &tokens,
+    static void parseCpp(const QVector<Token> &tokens,
             QStringList &includes,
-            QStringList &namespaces,
             QStringList &classes,
             QString &guard);
 
