@@ -4,6 +4,8 @@
 #include <QFileInfo>
 #include <QVector>
 
+#include "file_pro.h"
+
 bool TokenParser::readPlainFileData(
         const QString &filePath,
         PlainFileData &data,
@@ -28,8 +30,8 @@ bool TokenParser::readPlainFileData(
 
 void TokenParser::parseCpp(
         const QVector<Token> &tokens,
-        QStringList &includes,
-        QStringList &classes,
+        QVector<RefFile> &includes,
+        QVector<RefClass> &classes,
         QString &guard)
 {
     const QVector<CppTokenType> skipTokens {
@@ -41,7 +43,6 @@ void TokenParser::parseCpp(
     enum SaveNextTokenAs {
         None, Namespace, Class, Guard
     };
-    const QRegExp spaceRegExp("(\\s|\\{)+");
     const QStringList blockIdentifiers {"namespace", "class", "struct", "enum"};
     QStringList currentBlockStack;
     QString lastBlockName;
@@ -65,7 +66,7 @@ void TokenParser::parseCpp(
             --currentBlockDepth;
             continue;
         case int(CppTokenType::Include):
-            includes << token.text.split(spaceRegExp, QString::SkipEmptyParts).last();
+            includes << includeTokenToRawRef(token);
             continue;
         case int(CppTokenType::Directive):
             if (saveNextAs == None and token.text == "#ifndef")
@@ -84,11 +85,8 @@ void TokenParser::parseCpp(
                 continue;
             }
             lastBlockName = token.text;
-            if (saveNextAs == Class){
-                QStringList fullBlockStack = currentBlockStack;
-                fullBlockStack << token.text;
-                classes << fullBlockStack.join("::");
-            }
+            if (saveNextAs == Class)
+                classes << nameTokenToRawRef(currentBlockStack, token);
             saveNextAs = None;
             continue;
         default:
@@ -96,9 +94,29 @@ void TokenParser::parseCpp(
         }
 }
 
+RefFile TokenParser::includeTokenToRawRef(
+        const Token &token)
+{
+    Q_ASSERT(token.type == int(CppTokenType::Include));
+    const QString linkWithBracketsText = token.text.split(' ', QString::SkipEmptyParts).last();
+    const QString linkText = linkWithBracketsText.mid(1, linkWithBracketsText.length() - 2);
+    const bool isSystem = not linkWithBracketsText.startsWith("\"");
+    return RefFile(token.pos, linkText, isSystem);
+}
+
+RefClass TokenParser::nameTokenToRawRef(
+        const QStringList &currentBlockStack,
+        const Token &token)
+{
+    QStringList nameScopes = currentBlockStack;
+    nameScopes << token.text.split("::");
+    const QString name = nameScopes.takeLast();
+    return RefClass(token.pos + token.text.indexOf(name), name, nameScopes, true);
+}
+
 void TokenParser::parsePro(
         const FileData &data,
-        QVector<FileLink> &links)
+        QVector<RefFile> &links)
 {
 
 }

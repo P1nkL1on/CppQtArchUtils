@@ -25,10 +25,10 @@ Form2::Form2(QWidget *parent) :
     layout->addWidget(m_tokenText = new QPlainTextEdit, 1);
     m_tokenText->setReadOnly(true);
 
-    Tokenizer tokenizer = Tokenizer::proTokenizer();
+    Tokenizer tokenizer = Tokenizer::headerTokenizer();
     QDirIterator dirIterator(
                 "",
-                QStringList{"*.pro"},
+                QStringList{"*.h", "*.cpp"},
                 QDir::Files,
                 QDirIterator::Subdirectories);
 
@@ -63,10 +63,19 @@ Form2::Form2(QWidget *parent) :
         }
         const QVector<Token> tokens = tokenizer.tokenize(text);
 
-//        QString guard;
-//        QStringList linkStrs;
-//        QStringList classes;
-//        TokenParser::parseCpp(tokens, linkStrs, classes, guard);
+        QString guard;
+        QVector<RefFile> includes;
+        QVector<RefClass> classes;
+        TokenParser::parseCpp(tokens, includes, classes, guard);
+
+        QString includesStr;
+        for (const RefFile &i: includes)
+            includesStr += "    " + i + "\n";
+        QString classesStr;
+        for (const RefClass &i: classes)
+            classesStr += "    " + i + "\n";
+        m_resultText->setPlainText(QString("Guard: %1\n\nLinks:\n%2\nClasses:\n%3")
+                                   .arg(guard).arg(includesStr).arg(classesStr));
 
         m_fileText->setPlainText(text);
 
@@ -76,10 +85,6 @@ Form2::Form2(QWidget *parent) :
                     .arg(int(token.type))
                     .arg(token.text);
 
-//        m_resultText->setPlainText(QString("Guard: %1\n\nLinks:\n    %2\nClasses:\n    %3")
-//                                   .arg(guard)
-//                                   .arg(linkStrs.join("\n    "))
-//                                   .arg(classes.join("\n    ")));
         m_tokenText->setPlainText(tokensStr);
     });
 

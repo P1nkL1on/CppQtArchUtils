@@ -1,7 +1,7 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include "file_link.h"
+#include "ref_file.h"
 
 #include <QFileInfo>
 #include <QVector>
@@ -9,12 +9,13 @@
 class File
 {
 public:
-    File(const QString &filePath);
-    const QFileInfo &info() const;
-    const QVector<FileLink> &links() const;
+    explicit File(const QFileInfo &fileInfo);
+    virtual ~File();
+    virtual QVector<RefFile> refFiles() const;
+    void addRefToFile(const RefFile &ref);
 protected:
     QFileInfo m_fileInfo;
-    QVector<FileLink> m_links;
+    QVector<RefFile> m_refFiles;
 };
 
 #endif // FILE_H

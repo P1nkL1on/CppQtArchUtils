@@ -1,16 +1,21 @@
 #include "file.h"
 
-File::File(const QString &filePath) :
-    m_fileInfo(filePath)
+File::File(const QFileInfo &fileInfo) :
+    m_fileInfo(fileInfo)
 {
 }
 
-const QFileInfo &File::info() const
+File::~File()
 {
-    return m_fileInfo;
 }
 
-const QVector<FileLink> &File::links() const
+QVector<RefFile> File::refFiles() const
 {
-    return m_links;
+    return m_refFiles;
+}
+
+void File::addRefToFile(const RefFile &ref)
+{
+    if (not m_refFiles.contains(ref))
+        m_refFiles << ref;
 }

@@ -7,16 +7,19 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -std=c++17
 
 SOURCES += \
+    file_cpp.cpp \
+    file_pro.cpp \
     guard_converter.cpp \
     guard_converter_tests.cpp \
     lineedit_withhintlist.cpp \
     main.cpp \
     form.cpp \
+    ref_class.cpp \
+    ref_file.cpp \
     template_decoder.cpp \
     template_decoder_tests.cpp \
     template_loader.cpp \
     file.cpp \
-    file_link.cpp \
     form2.cpp \
     template_loader_tests.cpp \
     tokenizer.cpp \
@@ -24,15 +27,18 @@ SOURCES += \
     tokenizer_tests.cpp
 
 HEADERS += \
+    file_cpp.h \
+    file_pro.h \
     form.h \
     guard_converter.h \
     guard_converter_tests.h \
     lineedit_withhintlist.h \
+    ref_class.h \
+    ref_file.h \
     template_decoder.h \
     template_decoder_tests.h \
     template_loader.h \
     file.h \
-    file_link.h \
     file_data.h \
     form2.h \
     template_loader_tests.h \
