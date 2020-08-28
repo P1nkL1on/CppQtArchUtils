@@ -2,15 +2,13 @@
 
 #include "file_cpp.h"
 #include "token_parser.h"
-#include "tokenizer.h"
 
 File *FileCppFactory::read(const QString &filePath, QString &err)
 {
     PlainFileData data;
     if (not TokenParser::readPlainFileData(filePath, data, err))
         return nullptr;
-    const Tokenizer tokenizer = Tokenizer::headerTokenizer();
-    const QVector<Token> tokens = tokenizer.tokenize(data);
+    const QVector<Token> tokens = m_tokenizer.tokenize(data);
 
     QVector<RefFile> refFiles;
     QVector<RefClass> refClasses;

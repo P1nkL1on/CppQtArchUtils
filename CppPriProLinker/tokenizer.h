@@ -16,7 +16,7 @@ public:
     static QVector<Token> tokenize(
             const PlainFileData &plainData,
             const QVector<QRegExp> &tokenRegExpPatterns);
-    static Tokenizer headerTokenizer();
+    static Tokenizer cppTokenizer();
     static Tokenizer proTokenizer();
 protected:
     static Tokenizer regExpMapToTokenizer(

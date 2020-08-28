@@ -58,7 +58,7 @@ void TokenizerTests::headerCommentsMasking()
 }
 
 TokenizerTests::HeaderTokenizer::HeaderTokenizer() :
-    tokenizer(Tokenizer::headerTokenizer())
+    tokenizer(Tokenizer::cppTokenizer())
 {
 }
 

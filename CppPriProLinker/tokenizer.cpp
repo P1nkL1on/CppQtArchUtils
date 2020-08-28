@@ -48,7 +48,7 @@ QVector<Token> Tokenizer::tokenize
     return res;
 }
 
-Tokenizer Tokenizer::headerTokenizer()
+Tokenizer Tokenizer::cppTokenizer()
 {
     const QMap<int, QString> regExpMap {
         {int(CppTokenType::Include),     "#include((\\s*)((<([^>]*)>|\"([^\"]*)\")))"},

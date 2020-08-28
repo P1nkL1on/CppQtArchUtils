@@ -2,7 +2,6 @@
 
 #include "file_pro.h"
 #include "token_parser.h"
-#include "tokenizer.h"
 
 File *FileProFactory::read(const QString &filePath, QString &err)
 {
@@ -11,8 +10,7 @@ File *FileProFactory::read(const QString &filePath, QString &err)
     PlainFileData data;
     if (not TokenParser::readPlainFileData(filePath, data, err))
         return nullptr;
-    const Tokenizer tokenizer = Tokenizer::headerTokenizer();
-    const QVector<Token> tokens = tokenizer.tokenize(data);
+    const QVector<Token> tokens = m_tokenizer.tokenize(data);
 
     QVector<RefFile> refFiles;
     QVector<ProConfig> proConfigs;
