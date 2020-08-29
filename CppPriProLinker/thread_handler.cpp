@@ -20,8 +20,7 @@ void ThreadHandler::freeThread()
     if (not m_thread)
         return;
     m_thread->quit();
-    m_thread->wait();
-    delete m_thread;
+    m_thread->deleteLater();
     m_thread = nullptr;
 }
 
@@ -40,10 +39,12 @@ bool ThreadHandler::isWorking() const
 
 void ThreadHandler::startWorker(ThreadWorker *worker)
 {
+    worker->moveToThread(m_thread);
     QObject::connect(m_thread, &QThread::started, worker, &ThreadWorker::run);
     QObject::connect(worker, &ThreadWorker::finished, worker, [=]{
         delete worker;
         freeThread();
         m_isWorking = false;
     });
+    m_thread->start();
 }

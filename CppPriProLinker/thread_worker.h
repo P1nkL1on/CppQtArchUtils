@@ -16,8 +16,8 @@ public:
     };
     explicit ThreadWorker(QObject *parent = nullptr);
     virtual ~ThreadWorker();
-    QVector<QString> errMessages() const;
-    QMap<int, QString> errMessagesValuable() const;
+    QVector<QString> errors() const;
+    QMap<int, QString> valuableErrors() const;
     bool isFailed() const;
     void setStepsTotal(int steps);
     void setFailPolicy(const FailPolicy &failPolicy);
@@ -25,7 +25,7 @@ public:
 public slots:
     void run();
 protected slots:
-    void setStepFailed(int step, const QString &errMessages);
+    void setStepFailed(int step, const QString &errors);
 signals:
     void finished();
     void notifySteps(int steps);
@@ -35,7 +35,7 @@ protected:
     virtual bool shouldSkipEachStep() const;
     void notifyStepProgress();
     virtual void start() = 0;
-    virtual QString step() = 0;
+    virtual QString step(int) = 0;
     virtual void finish() = 0;
 
     int m_stepsTotal = 1;

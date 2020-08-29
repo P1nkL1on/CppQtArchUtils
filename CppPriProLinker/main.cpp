@@ -7,8 +7,8 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     Form2 w;
-    w.run("/home/alex/r3ds/Prohor/WTrack2");
-
+    w.run("/home/alex/jff/CppQtArchUtils/CppPriProLinker",
+          {"*.h", "*.cpp", "*.pro", "*.pri"});
     w.show();
 
     return a.exec();

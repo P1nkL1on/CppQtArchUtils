@@ -10,14 +10,14 @@ class ThreadWorkerLambda : public ThreadWorkerInterruptable
     Q_OBJECT
 public:
     using ProcessNoRet = std::function<void()>;
-    using ProcessErrRet = std::function<QString()>;
+    using ProcessErrRet = std::function<QString(int)>;
     explicit ThreadWorkerLambda(QObject *parent = nullptr);
     void setStart(const ProcessNoRet &start);
     void setStep(const ProcessErrRet &step);
     void setFinish(const ProcessNoRet &finish);
 protected:
     void start() override;
-    QString step() override;
+    QString step(int step) override;
     void finish() override;
     ProcessNoRet m_start = nullptr;
     ProcessErrRet m_step = nullptr;

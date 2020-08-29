@@ -11,9 +11,9 @@ void ThreadWorkerLambda::start()
         m_start();
 }
 
-QString ThreadWorkerLambda::step()
+QString ThreadWorkerLambda::step(int step)
 {
-    return m_step ? m_step() : QString();
+    return m_step ? m_step(step) : QString();
 }
 
 void ThreadWorkerLambda::finish()

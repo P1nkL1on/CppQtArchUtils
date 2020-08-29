@@ -51,15 +51,16 @@ void ThreadWorker::setFailPolicy(const FailPolicy &failPolicy)
 
 void ThreadWorker::run()
 {
-    m_errMessages.clear();
     emit started();
 
     start();
 
-#pragma omp parallel for
+    // clear messages
+    m_errMessages = QVector<QString>(m_stepsTotal);
+//#pragma omp parallel for
     for (int i = 0; i < m_stepsTotal; ++i){
         if (not shouldSkipEachStep()){
-            const QString err = step();
+            const QString err = step(i);
             if (err.isEmpty())
                 notifyStepProgress();
             else
@@ -83,12 +84,12 @@ void ThreadWorker::setStepsTotal(int steps)
     m_stepsTotal = steps;
 }
 
-QVector<QString> ThreadWorker::errMessages() const
+QVector<QString> ThreadWorker::errors() const
 {
     return m_errMessages;
 }
 
-QMap<int, QString> ThreadWorker::errMessagesValuable() const
+QMap<int, QString> ThreadWorker::valuableErrors() const
 {
     QMap<int, QString> res;
     for (int i = 0; i < m_errMessages.length(); ++i)

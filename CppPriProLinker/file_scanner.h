@@ -9,14 +9,17 @@ class FileScanner
 public:
     FileScanner();
     ~FileScanner();
-    ThreadWorker *createParserWorker(
+    void parseDir(
             const QString &dir,
-            const QStringList &fileTypes
-            = {"*.cpp", "*.h", "*.pri", "*.pro"});
+            const QStringList &fileWildCards,
+            bool showDialog = false,
+            QWidget *dialogParent = nullptr);
     static File *parseFile(
             const QString &filePath,
             const FileFactory *reader,
             QString &err);
+protected:
+    QHash<QString, FileFactory *> m_extToFileFactoryHash;
 };
 
 #endif // FILESCANNER_H
