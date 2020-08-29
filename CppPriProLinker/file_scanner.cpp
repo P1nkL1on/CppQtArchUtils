@@ -64,7 +64,7 @@ void FileScanner::parseDir(
         if (not file or not err.isEmpty())
             return err;
         files[i] = file;
-        qDebug() << "OK    " << filePath;
+//        qDebug() << "OK    " << filePath;
         return QString();
     });
     worker->setFinish([=]{
@@ -76,7 +76,7 @@ void FileScanner::parseDir(
     QEventLoop loop;
     QObject::connect(worker, &ThreadWorker::finished,
                      &loop, &QEventLoop::quit);
-    ThreadHandler h;
+    ThreadHandlerDialog h(dialogParent);
     const bool isOk = h.tryRun(worker);
     Q_ASSERT(isOk);
     loop.exec(QEventLoop::ExcludeUserInputEvents);

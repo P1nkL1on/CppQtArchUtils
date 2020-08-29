@@ -13,21 +13,22 @@ ThreadHandlerDialog::ThreadHandlerDialog(
 void ThreadHandlerDialog::startWorker(ThreadWorker *worker)
 {
     ThreadWorkerInterruptable *workerInter
-            = dynamic_cast<ThreadWorkerInterruptable *>(worker);
+            = qobject_cast<ThreadWorkerInterruptable *>(worker);
     const bool canBeTerminated = workerInter;
     DialogProgress::ShowElements flags = m_showDialogElements;
     if (not canBeTerminated)
         flags &= ~DialogProgress::TerminataBtn;
     DialogProgress *dialog = new DialogProgress(m_dialogParent, flags);
-    QObject::connect(worker, &ThreadWorker::started,
-                     dialog, [=]{ dialog->setTotal(worker->stepsTotal()); });
-    QObject::connect(worker, &ThreadWorker::notifySteps,
-                     dialog, &DialogProgress::setProgress);
+    QObject::connect(worker, &ThreadWorker::notifySteps, dialog, [=](int progress){
+        dialog->setTotal(worker->stepsTotal());
+        dialog->setProgress(progress);
+    });
     QObject::connect(worker, &ThreadWorker::finished,
                      dialog, &DialogProgress::accept);
-    if (canBeTerminated)
-        QObject::connect(dialog, &DialogProgress::terminated,
-                         workerInter, &ThreadWorkerInterruptable::abort);
+    QObject::connect(dialog, &DialogProgress::terminated, [=]{
+        if (canBeTerminated)
+            workerInter->abort();
+    });
     ThreadHandler::startWorker(worker);
     dialog->exec();
 }

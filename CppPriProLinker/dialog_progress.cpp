@@ -62,6 +62,7 @@ void DialogProgress::setProgress(int progress)
 }
 int DialogProgress::exec()
 {
+    m_isTerminated = false;
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, [=]{
         const QString elapsedStr = formatTime(m_elaspedTimer.elapsed());

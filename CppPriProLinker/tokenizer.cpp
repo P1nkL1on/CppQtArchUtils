@@ -2,7 +2,6 @@
 
 #include <QRegExp>
 #include <QMap>
-#include <QtDebug>
 
 Tokenizer::Tokenizer(const QVector<QRegExp> &tokenRegExpPatterns) :
     m_tokenRegExpPatterns(tokenRegExpPatterns)
