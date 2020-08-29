@@ -8,10 +8,8 @@ FileScanner::FileScanner()
 File *FileScanner::parseFile(
         const QString &filePath,
         const FileFactory *reader,
-        QString &err,
-        int &readingTime,
-        int &tokenizeTime,
-        int &parsingTime)
+        QString &err)
 {
-
+    const QString ext = QFileInfo(filePath).suffix();
+    return reader->read(filePath, err);
 }

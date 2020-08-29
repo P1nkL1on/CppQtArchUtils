@@ -9,6 +9,8 @@ QMAKE_CXXFLAGS += -fopenmp
 QMAKE_LFLAGS += -fopenmp
 
 SOURCES += \
+    dialog.cpp \
+    dialog_progress.cpp \
     file_cpp.cpp \
     file_cpp_factory.cpp \
     file_pro.cpp \
@@ -27,13 +29,17 @@ SOURCES += \
     file.cpp \
     form2.cpp \
     template_loader_tests.cpp \
+    thread_handler.cpp \
     thread_worker.cpp \
     thread_worker_interruptable.cpp \
+    thread_worker_lambda.cpp \
     tokenizer.cpp \
     token_parser.cpp \
     tokenizer_tests.cpp
 
 HEADERS += \
+    dialog.h \
+    dialog_progress.h \
     file_cpp.h \
     file_cpp_factory.h \
     file_factory.h \
@@ -53,8 +59,10 @@ HEADERS += \
     file_data.h \
     form2.h \
     template_loader_tests.h \
+    thread_handler.h \
     thread_worker.h \
     thread_worker_interruptable.h \
+    thread_worker_lambda.h \
     token.h \
     tokenizer.h \
     token_parser.h \

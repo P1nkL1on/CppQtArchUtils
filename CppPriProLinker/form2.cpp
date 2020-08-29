@@ -8,6 +8,7 @@
 
 #include "file_cpp_factory.h"
 #include "file_pro_factory.h"
+#include "dialog_progress.h"
 
 Form2::Form2(QWidget *parent) :
     QMainWindow(parent)
@@ -126,15 +127,15 @@ File * Form2::read(
         int &tokenizeTime,
         int &parsingTime) const
 {
-    const QString ext = QFileInfo(filePath).suffix();
-    if (not m_extToFileFactoryHash.contains(ext))
-        return nullptr;
-    FileFactory *f = m_extToFileFactoryHash.value(ext, nullptr);
-    return f->read(filePath, err);
 }
 
 void Form2::run(const QString &dir)
 {
+    Dialog *d = new Dialog(this);
+    d->setOkCancel();
+    qDebug() << d->exec();
+    return;
+
     QStringList extMasks;
     for (const QString &s : m_extToFileFactoryHash.keys())
         extMasks << "*." + s;
