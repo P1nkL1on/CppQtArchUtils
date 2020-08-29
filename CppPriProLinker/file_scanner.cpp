@@ -45,7 +45,10 @@ void FileScanner::parseDir(
                     QDirIterator::Subdirectories);
         int filesCount = 0;
         while (dirIterator.hasNext()){
-            filePathes << dirIterator.next();
+            const QString filePath = dirIterator.next();
+            if (filePath.contains("moc_") or filePath.contains("build-"))
+                continue;
+            filePathes << filePath;
             ++filesCount;
         }
         files = QVector<File *>(filesCount, nullptr);

@@ -13,9 +13,9 @@ QVector<Token> Tokenizer::tokenize(const PlainFileData &plainData) const
     return tokenize(plainData, m_tokenRegExpPatterns);
 }
 
-QVector<Token> Tokenizer::tokenize
-(const PlainFileData &plainData,
-            const QVector<QRegExp> &tokenRegExpPatterns)
+QVector<Token> Tokenizer::tokenize(
+        const PlainFileData &plainData,
+        const QVector<QRegExp> &tokenRegExpPatterns)
 {
     int currentPos = 0;
     QVector<Token> res;
