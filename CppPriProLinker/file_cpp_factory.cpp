@@ -3,7 +3,7 @@
 #include "file_cpp.h"
 #include "token_parser.h"
 
-File *FileCppFactory::read(const QString &filePath, QString &err)
+File *FileCppFactory::read(const QString &filePath, QString &err) const
 {
     PlainFileData data;
     if (not TokenParser::readPlainFileData(filePath, data, err))

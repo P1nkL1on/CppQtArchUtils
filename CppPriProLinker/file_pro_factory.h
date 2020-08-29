@@ -8,7 +8,7 @@ class FileProFactory : public FileFactory
 {
 public:
     FileProFactory() = default;
-    File *read(const QString &filePath, QString &err) override;
+    File *read(const QString &filePath, QString &err) const override;
 protected:
     Tokenizer m_tokenizer = Tokenizer::proTokenizer();
 };

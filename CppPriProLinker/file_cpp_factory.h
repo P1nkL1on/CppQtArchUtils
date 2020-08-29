@@ -8,7 +8,7 @@ class FileCppFactory : public FileFactory
 {
 public:
     FileCppFactory() = default;
-    File *read(const QString &filePath, QString &err) override;
+    File *read(const QString &filePath, QString &err) const override;
 protected:
     Tokenizer m_tokenizer = Tokenizer::cppTokenizer();
 };

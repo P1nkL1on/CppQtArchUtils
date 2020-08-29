@@ -4,8 +4,7 @@
 #include <QMainWindow>
 #include <QPlainTextEdit>
 #include <QListWidget>
-
-#include "file_factory.h"
+#include "file_scanner.h"
 
 class Token;
 class Tokenizer;
@@ -17,7 +16,12 @@ class Form2 : public QMainWindow
 public:
     Form2(QWidget *parent = nullptr);
     ~Form2();
-    File *read(const QString &filePath, QString &err) const;
+    File *read(
+            const QString &filePath,
+            QString &err,
+            int &readingTime,
+            int &tokenizeTime,
+            int &parsingTime) const;
     void run(const QString &dir);
 protected:
     QHash<QString, FileFactory *> m_extToFileFactoryHash;

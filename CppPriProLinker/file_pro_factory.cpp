@@ -3,7 +3,7 @@
 #include "file_pro.h"
 #include "token_parser.h"
 
-File *FileProFactory::read(const QString &filePath, QString &err)
+File *FileProFactory::read(const QString &filePath, QString &err) const
 {
     // todo move common part to parent class
     // common with file_cpp_factory and other siblings

@@ -119,7 +119,12 @@ void Form2::startDeprecated()
     });
 }
 
-File * Form2::read(const QString &filePath, QString &err) const
+File * Form2::read(
+        const QString &filePath,
+        QString &err,
+        int &readingTime,
+        int &tokenizeTime,
+        int &parsingTime) const
 {
     const QString ext = QFileInfo(filePath).suffix();
     if (not m_extToFileFactoryHash.contains(ext))
@@ -141,7 +146,8 @@ void Form2::run(const QString &dir)
     while (dirIterator.hasNext()){
         const QString path = dirIterator.next();
         QString err;
-        File *file = read(path, err);
+        int a, b, c;
+        File *file = read(path, err, a, b, c);
         m_absPathToFileHash.insert(path, file);
         if (file == nullptr){
             m_absPathToFilePreview.insert(path, err);
