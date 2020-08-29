@@ -1,6 +1,11 @@
 #ifndef DIALOGPROGRESS_H
 #define DIALOGPROGRESS_H
 
+#include <QLabel>
+#include <QProgressBar>
+#include <QElapsedTimer>
+#include <QTimer>
+
 #include "dialog.h"
 
 class DialogProgress : public Dialog
@@ -9,11 +14,10 @@ class DialogProgress : public Dialog
 public:
     enum Show {
         None            = 0,
-        StateLabel      = 1,
-        ElapsedTime     = 2,
-        RemainingTime   = 4,
-        ProgressBar     = 8,
-        TerminataBtn    = 16,
+        ElapsedTime     = 1,
+        RemainingTime   = 2,
+        ProgressBar     = 4,
+        TerminataBtn    = 8,
         Time            = ElapsedTime | RemainingTime,
         TimeAndProgress = Time | ProgressBar,
         TimeAndProgressAndTerminate = TimeAndProgress | TerminataBtn
@@ -29,9 +33,22 @@ public:
 public slots:
     void setProgress(int progress);
     void reject() override;
+    int exec() override;
+signals:
+    void terminated();
 protected:
     void closeEvent(QCloseEvent *e) override;
+    QString formatTime(int64_t ms) const;
+    ShowElements m_shownElements;
+    int m_total = 1;
+    int m_progress = 0;
     bool m_isTerminated = false;
+
+    QLabel *m_labelElapsed = nullptr;
+    QLabel *m_labelRemaining = nullptr;
+    QProgressBar *m_progressBar = nullptr;
+    QElapsedTimer m_elaspedTimer;
+    QTimer *m_timer = nullptr;
 };
 
 #endif // DIALOGPROGRESS_H

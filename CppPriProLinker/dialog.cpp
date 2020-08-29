@@ -25,17 +25,10 @@ QDialogButtonBox *Dialog::buttons() const
     return m_buttons;
 }
 
-void Dialog::setContent(QWidget *content)
+void Dialog::setCentralWidget(QWidget *widget)
 {
-    if (m_content)
-        m_contentLayout->removeWidget(m_content);
-    m_content = content;
-    m_contentLayout->addWidget(m_content, 1);
-}
-
-void Dialog::setOkCancel()
-{
-    m_buttons->clear();
-    m_buttons->addButton(QDialogButtonBox::Ok);
-    m_buttons->addButton(QDialogButtonBox::Cancel);
+    if (m_centralWidget)
+        m_contentLayout->removeWidget(m_centralWidget);
+    m_centralWidget = widget;
+    m_contentLayout->addWidget(m_centralWidget, 1);
 }

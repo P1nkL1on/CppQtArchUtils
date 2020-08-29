@@ -131,8 +131,8 @@ File * Form2::read(
 
 void Form2::run(const QString &dir)
 {
-    Dialog *d = new Dialog(this);
-    d->setOkCancel();
+    Dialog *d = new DialogProgress(this, DialogProgress::TimeAndProgressAndTerminate);
+
     qDebug() << d->exec();
     return;
 
