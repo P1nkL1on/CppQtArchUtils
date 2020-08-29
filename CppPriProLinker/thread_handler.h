@@ -14,8 +14,9 @@ public:
     bool isWorking() const;
 
 protected:
-    void cleanThreadIfExist(QThread *thread);
-    QThread *tryGetFreeThread();
+    virtual void startWorker(ThreadWorker *worker);
+    void freeThread();
+    bool isThreadFree();
     bool m_isWorking = false;
     QThread *m_thread = nullptr;
 };

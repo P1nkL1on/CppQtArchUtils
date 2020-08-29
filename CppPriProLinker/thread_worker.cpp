@@ -39,6 +39,11 @@ void ThreadWorker::notifyStepProgress()
     emit notifyProgress(float(m_stepsNotified) / m_stepsTotal);
 }
 
+int ThreadWorker::stepsTotal() const
+{
+    return m_stepsTotal;
+}
+
 void ThreadWorker::setFailPolicy(const FailPolicy &failPolicy)
 {
     m_failPolicy = failPolicy;

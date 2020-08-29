@@ -30,6 +30,7 @@ SOURCES += \
     form2.cpp \
     template_loader_tests.cpp \
     thread_handler.cpp \
+    thread_handler_dialog.cpp \
     thread_worker.cpp \
     thread_worker_interruptable.cpp \
     thread_worker_lambda.cpp \
@@ -60,6 +61,7 @@ HEADERS += \
     form2.h \
     template_loader_tests.h \
     thread_handler.h \
+    thread_handler_dialog.h \
     thread_worker.h \
     thread_worker_interruptable.h \
     thread_worker_lambda.h \

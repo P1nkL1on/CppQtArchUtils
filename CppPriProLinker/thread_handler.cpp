@@ -2,41 +2,48 @@
 
 ThreadHandler::~ThreadHandler()
 {
-    cleanThreadIfExist(m_thread);
+    freeThread();
 }
 
 bool ThreadHandler::tryRun(ThreadWorker *worker)
 {
-    QThread *thread = tryGetFreeThread();
-    if (not thread)
+    if (not isThreadFree())
         return false;
     Q_ASSERT(not m_isWorking);
     m_isWorking = true;
-    QObject::connect(thread, &QThread::started, worker, &ThreadWorker::run);
-    QObject::connect(worker, &ThreadWorker::finished, worker, [=]{
-        m_isWorking = false;
-        delete worker;
-        cleanThreadIfExist(thread);
-    });
+    startWorker(worker);
     return true;
 }
 
-void ThreadHandler::cleanThreadIfExist(QThread *thread)
+void ThreadHandler::freeThread()
 {
-    thread->quit();
-    thread->wait();
-    delete thread;
+    if (not m_thread)
+        return;
+    m_thread->quit();
+    m_thread->wait();
+    delete m_thread;
+    m_thread = nullptr;
 }
 
-QThread *ThreadHandler::tryGetFreeThread()
+bool ThreadHandler::isThreadFree()
 {
     if (isWorking())
-        return nullptr;
+        return false;
     m_thread = new QThread();
-    return m_thread;
+    return true;
 }
 
 bool ThreadHandler::isWorking() const
 {
     return m_isWorking;
+}
+
+void ThreadHandler::startWorker(ThreadWorker *worker)
+{
+    QObject::connect(m_thread, &QThread::started, worker, &ThreadWorker::run);
+    QObject::connect(worker, &ThreadWorker::finished, worker, [=]{
+        delete worker;
+        freeThread();
+        m_isWorking = false;
+    });
 }

@@ -21,7 +21,7 @@ public:
     bool isFailed() const;
     void setStepsTotal(int steps);
     void setFailPolicy(const FailPolicy &failPolicy);
-
+    int stepsTotal() const;
 public slots:
     void run();
 protected slots:
