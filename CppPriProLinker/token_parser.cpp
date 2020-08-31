@@ -151,7 +151,7 @@ void TokenParser::parsePro(
         None = -1, Headers, Sources, Resources, OtherFiles, Include
     };
     const QStringList listBlockNames {
-        "HEADERS", "SOURCES", "RESOURCES", "OTHERFILES", "include"
+        "HEADERS", "SOURCES", "RESOURCES", "OTHER_FILES", "include"
     };
     SaveNextTokenAs saveNextAs = None;
 

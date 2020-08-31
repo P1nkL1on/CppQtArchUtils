@@ -8,6 +8,10 @@ namespace ThreadUtils
 {
 using foo = std::function<void()>;
 
+void runWithEventLoop(
+        ThreadHandler *handler,
+        ThreadWorker *worker);
+
 void runOnBackground(
         ThreadHandler *handler,
         ThreadWorker *worker,

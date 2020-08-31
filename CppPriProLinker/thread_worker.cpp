@@ -44,6 +44,11 @@ int ThreadWorker::stepsTotal() const
     return m_stepsTotal;
 }
 
+int ThreadWorker::successStepsCount() const
+{
+    return m_stepsTotal - valuableErrors().size();
+}
+
 void ThreadWorker::setFailPolicy(const FailPolicy &failPolicy)
 {
     m_failPolicy = failPolicy;
