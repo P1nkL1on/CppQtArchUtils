@@ -6,14 +6,16 @@
 #include <QFileInfo>
 #include <QVector>
 
+class Folder;
+
 class File
 {
 public:
-    explicit File(const QFileInfo &fileInfo);
-    virtual ~File();
-    QHash<RefFile, File *> refs;
+    explicit File() = default;
+    virtual ~File() = default;
+    void addRawRefs(const QVector<RefFile> &rawRefs);
 protected:
-    QFileInfo m_fileInfo;
+    QHash<RefFile, File *> m_refs;
 };
 
 #endif // FILE_H

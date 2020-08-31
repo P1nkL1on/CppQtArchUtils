@@ -1,14 +1,5 @@
 #include "file_pro.h"
 
-FilePro::FilePro(const QFileInfo &fileInfo) :
-    File(fileInfo)
-{
-}
-
-FilePro::~FilePro()
-{
-}
-
 void FilePro::addConfig(const ProConfig &config)
 {
     m_config << config;

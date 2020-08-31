@@ -11,9 +11,11 @@ public:
             QWidget *dialogParent = nullptr,
             DialogProgress::ShowElements showDialogElements
             = DialogProgress::TimeAndProgressAndTerminate);
+    void setDialogTitle(const QString &dialogTitle);
 protected:
     void startWorker(ThreadWorker *worker) override;
     QWidget *m_dialogParent = nullptr;
+    QString m_dialogTitle;
     DialogProgress::ShowElements m_showDialogElements;
 };
 

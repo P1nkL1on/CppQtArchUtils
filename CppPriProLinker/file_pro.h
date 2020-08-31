@@ -26,8 +26,7 @@ struct ProConfig {
 class FilePro : public File
 {
 public:
-    explicit FilePro(const QFileInfo &fileInfo);
-    ~FilePro() override;
+    explicit FilePro() = default;
     void addConfig(const ProConfig &config);
 protected:
     QVector<ProConfig> m_config;

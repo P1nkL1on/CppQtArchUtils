@@ -8,19 +8,15 @@ Tokenizer FileProFactory::tokenizer() const
     return Tokenizer::proTokenizer();
 }
 
-File *FileProFactory::createFile(
-        const QFileInfo &info,
-        const QVector<Token> &tokens) const
+File *FileProFactory::createFile(const QVector<Token> &tokens) const
 {
 
-    QVector<RefFile> refFiles;
+    QVector<RefFile> rawRefFiles;
     QVector<ProConfig> proConfigs;
     QString guard;
-    TokenParser::parsePro(tokens, refFiles, proConfigs);
+    TokenParser::parsePro(tokens, rawRefFiles, proConfigs);
 
-    File *res = new FilePro(info);
-    for (const RefFile &ref : refFiles)
-        res->refs.insert(ref, nullptr);
-
+    File *res = new FilePro();
+    res->addRawRefs(rawRefFiles);
     return res;
 }

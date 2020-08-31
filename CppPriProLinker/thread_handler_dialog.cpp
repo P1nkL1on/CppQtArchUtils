@@ -19,6 +19,8 @@ void ThreadHandlerDialog::startWorker(ThreadWorker *worker)
     if (not canBeTerminated)
         flags &= ~DialogProgress::TerminataBtn;
     DialogProgress *dialog = new DialogProgress(m_dialogParent, flags);
+    if (not m_dialogTitle.isEmpty())
+        dialog->setWindowTitle(m_dialogTitle);
     QObject::connect(worker, &ThreadWorker::notifySteps, dialog, [=](int progress){
         dialog->setTotal(worker->stepsTotal());
         dialog->setProgress(progress);
@@ -31,4 +33,9 @@ void ThreadHandlerDialog::startWorker(ThreadWorker *worker)
     });
     ThreadHandler::startWorker(worker);
     dialog->exec();
+}
+
+void ThreadHandlerDialog::setDialogTitle(const QString &dialogTitle)
+{
+    m_dialogTitle = dialogTitle;
 }

@@ -7,8 +7,7 @@
 class FileCpp : public File
 {
 public:
-    explicit FileCpp(const QFileInfo &fileInfo);
-    ~FileCpp() override;
+    explicit FileCpp() = default;
 protected:
 };
 

@@ -1,10 +1,8 @@
 #include "file.h"
 
-File::File(const QFileInfo &fileInfo) :
-    m_fileInfo(fileInfo)
+void File::addRawRefs(const QVector<RefFile> &rawRefs)
 {
-}
-
-File::~File()
-{
+    for (const RefFile &r : rawRefs)
+        if (not m_refs.contains(r))
+            m_refs.insert(r, nullptr);
 }

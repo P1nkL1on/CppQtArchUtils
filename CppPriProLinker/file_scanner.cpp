@@ -2,10 +2,10 @@
 
 #include <QDirIterator>
 #include <QDebug>
-#include <QEventLoop>
 
 #include "thread_worker_lambda.h"
 #include "thread_handler_dialog.h"
+#include "thread_utils.h"
 #include "file_cpp_factory.h"
 #include "file_pro_factory.h"
 
@@ -17,7 +17,7 @@ FileScanner::FileScanner()
         {"h", cpps},
         {"cpp", cpps},
         {"pri", pris},
-//        {"pro", pris}
+        {"pro", pris}
     };
 }
 
@@ -28,11 +28,14 @@ FileScanner::~FileScanner()
 void FileScanner::parseDir(
         const QString &dir,
         const QStringList &fileWildCards,
-        bool showDialog,
         QWidget *dialogParent)
 {
     QStringList filePathes;
     QVector<File *> files;
+    QHash<QString, QStringList> folderToFilesPathesHash;
+    const auto addFile = [&](const QString &filePath){
+        filePathes << filePath;
+    };
 
     // worker definition
     ThreadWorkerLambda *worker = new ThreadWorkerLambda;
@@ -48,7 +51,7 @@ void FileScanner::parseDir(
             const QString filePath = dirIterator.next();
             if (filePath.contains("moc_") or filePath.contains("build-"))
                 continue;
-            filePathes << filePath;
+            addFile(filePath);
             ++filesCount;
         }
         files = QVector<File *>(filesCount, nullptr);
@@ -60,14 +63,12 @@ void FileScanner::parseDir(
         const QString ext = info.suffix();
         FileFactory *factory = m_extToFileFactoryHash.value(ext, nullptr);
         if (not factory)
-            return QString("No factory found for %1!")
-                    .arg(filePath);
+            return QString("No factory found for %1!").arg(filePath);
         QString err;
-        File * file = FileScanner::parseFile(filePath, factory, err);
+        File * file = factory->read(filePath, err);
         if (not file or not err.isEmpty())
             return err;
         files[i] = file;
-//        qDebug() << "OK    " << filePath;
         return QString();
     });
     worker->setFinish([=]{
@@ -76,23 +77,10 @@ void FileScanner::parseDir(
         qDebug() << "Errors:" << worker->valuableErrors();
     });
 
-    QEventLoop loop;
-    QObject::connect(worker, &ThreadWorker::finished,
-                     &loop, &QEventLoop::quit);
+
     ThreadHandlerDialog h(dialogParent);
-    const bool isOk = h.tryRun(worker);
-    Q_ASSERT(isOk);
-    loop.exec(QEventLoop::ExcludeUserInputEvents);
+    h.setDialogTitle("Parsing files");
+    ThreadUtils::runOnBackground(&h, worker);
 
     qDebug() << "parse dir finished";
-    qDeleteAll(files);
-}
-
-File *FileScanner::parseFile(
-        const QString &filePath,
-        const FileFactory *reader,
-        QString &err)
-{
-    const QString ext = QFileInfo(filePath).suffix();
-    return reader->read(filePath, err);
 }

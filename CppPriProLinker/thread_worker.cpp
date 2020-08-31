@@ -58,7 +58,7 @@ void ThreadWorker::run()
     // clear messages
     m_errMessages = QVector<QString>(m_stepsTotal);
 
-    // #pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < m_stepsTotal; ++i){
         if (not shouldSkipEachStep()){
             const QString err = step(i);

@@ -37,7 +37,7 @@ Form2::~Form2()
 void Form2::run(const QString &dir, const QStringList &fileWildCards)
 {
     FileScanner s;
-    s.parseDir(dir, fileWildCards, true, this);
+    s.parseDir(dir, fileWildCards, this);
 }
 
 //void Form2::startDeprecated()
