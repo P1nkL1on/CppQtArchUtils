@@ -20,6 +20,7 @@ SOURCES += \
     guard_converter.cpp \
     guard_converter_tests.cpp \
     lineedit_withhintlist.cpp \
+    linker.cpp \
     main.cpp \
     form.cpp \
     ref_class.cpp \
@@ -53,6 +54,7 @@ HEADERS += \
     guard_converter.h \
     guard_converter_tests.h \
     lineedit_withhintlist.h \
+    linker.h \
     ref_class.h \
     ref_file.h \
     template_decoder.h \

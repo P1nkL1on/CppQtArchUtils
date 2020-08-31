@@ -9,7 +9,7 @@ class FileScanner
 public:
     FileScanner();
     ~FileScanner();
-    void parseDir(const QString &dir,
+    QVector<File *> parseDir(const QString &dir,
             const QStringList &fileWildCards,
             QWidget *dialogParent = nullptr);
 protected:

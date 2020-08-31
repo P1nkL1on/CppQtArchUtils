@@ -3,6 +3,15 @@
 void File::addRawRefs(const QVector<RefFile> &rawRefs)
 {
     for (const RefFile &r : rawRefs)
-        if (not m_refs.contains(r))
-            m_refs.insert(r, nullptr);
+        setRef(r, nullptr);
+}
+
+void File::setRef(const RefFile &ref, File *file)
+{
+    m_refToFileHash.insert(ref, file);
+}
+
+QList<RefFile> File::refs() const
+{
+    return m_refToFileHash.keys();
 }
