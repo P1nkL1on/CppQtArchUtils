@@ -18,6 +18,7 @@ public:
     QList<RefFile> refs() const;
 protected:
     QHash<RefFile, File *> m_refToFileHash;
+    friend class Form2;
 };
 
 #endif // FILE_H

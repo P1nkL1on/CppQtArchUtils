@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QPlainTextEdit>
+#include <QTextBrowser>
 #include <QListWidget>
 #include "file_scanner.h"
 
@@ -33,7 +34,7 @@ protected:
 
     QListWidget *m_filesList = nullptr;
     QPlainTextEdit *m_fileText = nullptr;
-    QPlainTextEdit *m_resultText = nullptr;
+    QTextBrowser *m_resultText = nullptr;
     QPlainTextEdit *m_tokenText = nullptr;
 private:
 //    void startDeprecated();

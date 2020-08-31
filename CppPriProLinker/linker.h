@@ -8,6 +8,7 @@ class Linker
 {
 public:
     enum class RefType {Cpp, Pro};
+    Linker() = default;
     Linker(const QStringList &absFilePathes);
     QString findFilePathForRef(
             const QString &filePath,

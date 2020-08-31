@@ -19,8 +19,9 @@ Form2::Form2(QWidget *parent) :
 //    layout->addWidget(m_fileText = new QPlainTextEdit, 1);
 //    m_fileText->setReadOnly(true);
 
-    layout->addWidget(m_resultText = new QPlainTextEdit, 1);
+    layout->addWidget(m_resultText = new QTextBrowser, 1);
     m_resultText->setReadOnly(true);
+
 
 //    layout->addWidget(m_tokenText = new QPlainTextEdit, 1);
 //    m_tokenText->setReadOnly(true);
@@ -37,7 +38,28 @@ Form2::~Form2()
 void Form2::run(const QString &dir, const QStringList &fileWildCards)
 {
     FileScanner s;
-    s.parseDir(dir, fileWildCards, this);
+    QStringList pathes;
+    QVector<File *> fs = s.parseDir(dir, fileWildCards, this, pathes);
+
+    // m_resultText->setPlainText("");
+
+    m_filesList->addItems(pathes);
+    connect(m_filesList, &QListWidget::itemPressed, this, [=](QListWidgetItem *item){
+        const QString filePath = item->text();
+        const int ind = pathes.indexOf(filePath);
+        Q_ASSERT(ind >= 0);
+        File *f = fs[ind];
+
+        QString text = QString("Path: %1\n\nLinks:\n").arg(filePath);
+        for (const RefFile &ref : f->m_refToFileHash.keys()){
+            File *d = f->m_refToFileHash[ref];
+            const QString refPath = d ? pathes[fs.indexOf(d)] : "?";
+            text += QString("    %1 -> %2\n")
+                    .arg(ref.text)
+                    .arg(refPath);
+        }
+        m_resultText->setText(text);
+    });
 }
 
 //void Form2::startDeprecated()

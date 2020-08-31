@@ -8,6 +8,7 @@
 #include "thread_utils.h"
 #include "file_cpp_factory.h"
 #include "file_pro_factory.h"
+#include "linker.h"
 
 FileScanner::FileScanner()
 {
@@ -28,58 +29,15 @@ FileScanner::~FileScanner()
 QVector<File *> FileScanner::parseDir(
         const QString &dir,
         const QStringList &fileWildCards,
-        QWidget *dialogParent)
+        QWidget *dialogParent,
+        QStringList &pathes)
 {
     QStringList filePathes;
     QVector<File *> files;
-    QHash<QString, QStringList> folderToFilesPathesHash;
+
+    Linker linker;
     QVector<QHash<RefFile, QString>> preLinkHashes;
 
-
-    const auto isFolder = [](const QString &path) -> bool { return path.contains("/"); };
-    const auto folder = [](const QString &path) -> QString { return path.mid(0, path.lastIndexOf("/")); };
-
-    const std::function<void(const QString &)> addFolder = [&](const QString &fileInFolderPath){
-        if (not isFolder(fileInFolderPath))
-            return;
-        const QString folderPath = folder(fileInFolderPath);
-        if (not folderToFilesPathesHash.contains(folderPath))
-            addFolder(folderPath);
-        folderToFilesPathesHash[folderPath] << fileInFolderPath;
-    };
-    const auto addFile = [&](const QString &filePath){
-        filePathes << filePath;
-        addFolder(filePath);
-    };
-    const std::function<QString (const QString &, const QString &, QStringList &)> folderLink
-            = [&](const QString &folderPath, const QString &fileEnd, QStringList &folderBlackList) -> QString
-    {
-        const QStringList filePathesInFolder = folderToFilesPathesHash.value(folderPath);
-        QStringList foldersToCheck {folder(folderPath)};
-        for (const QString &p : filePathesInFolder){
-            if (folderToFilesPathesHash.contains(p))
-                foldersToCheck << p;
-            else if (p.endsWith(fileEnd))
-                return p;
-        }
-        folderBlackList << folderPath;
-        for (const QString &f : foldersToCheck)
-            if (not folderBlackList.contains(f)){
-                const QString res = folderLink(f, fileEnd, folderBlackList);
-                if (not res.isEmpty())
-                    return res;
-            }
-        return QString();
-    };
-    const auto resolveLinkPath = [=](const QString &filePath, const RefFile &ref) -> QString {
-        QString t = ref.text;
-        if (not t.startsWith("/"))
-            t = "/" + t;
-        QStringList b;
-        return folderLink(folder(filePath), t, b);
-    };
-
-    // worker definition
     ThreadWorkerLambda *worker = new ThreadWorkerLambda;
     worker->setFailPolicy(ThreadWorker::FailPolicy::IfAllStepsFailed);
     worker->setStart([&]{
@@ -93,12 +51,13 @@ QVector<File *> FileScanner::parseDir(
             const QString filePath = dirIterator.next();
             if (filePath.contains("moc_") or filePath.contains("build-"))
                 continue;
-            addFile(filePath);
+            filePathes << filePath;
             ++filesCount;
         }
         files = QVector<File *>(filesCount, nullptr);
         preLinkHashes = QVector<QHash<RefFile, QString>>(filesCount);
         worker->setStepsTotal(filesCount);
+        linker = Linker(filePathes);
     });
     worker->setStep([&](int i){
         const QString filePath = filePathes[i];
@@ -114,25 +73,31 @@ QVector<File *> FileScanner::parseDir(
         files[i] = file;
 
         // linkage
+        const Linker::RefType refType =
+                filePath.endsWith(".pri") or filePath.endsWith(".pro") ?
+                    Linker::RefType::Pro: Linker::RefType::Cpp;
         for (const RefFile &ref : file->refs())
-            if (not ref.isSystem)
-                preLinkHashes[i].insert(ref, resolveLinkPath(filePath, ref));
+            if (not ref.isSystem){
+                const QString refPath = linker.findFilePathForRef(filePath, ref.text, refType);
+                if (refPath.isEmpty())
+                    continue;
+                preLinkHashes[i].insert(ref, refPath);
+            }
         return QString();
     });
     worker->setFinish([&]{
         // link
-        for (int i = 0; i < files.length(); ++i){
-            const QHash<RefFile, QString> &preLink = preLinkHashes[i];
+        for (int fileInd = 0; fileInd < files.length(); ++fileInd){
+            const QHash<RefFile, QString> &preLink = preLinkHashes[fileInd];
             for (const RefFile &ref : preLink.keys()){
                 const QString filePath = preLink.value(ref);
-                const int j = filePathes.indexOf(filePath);
-                if (j < 0)
+                const int refFileInd = filePathes.indexOf(filePath);
+                if (refFileInd < 0)
                     continue;
-                files[i]->setRef(ref, files[j]);
-                qDebug() << ref.text << "     -->    " << filePathes[j];
+                files[fileInd]->setRef(ref, files[refFileInd]);
+                qDebug() << ref.text << "     -->    " << filePathes[refFileInd];
             }
         }
-
         qDebug() << "Finished";
         qDebug() << "Failed:" << worker->isFailed();
         qDebug() << "Errors:" << worker->valuableErrors();
@@ -144,5 +109,6 @@ QVector<File *> FileScanner::parseDir(
     ThreadUtils::runOnBackground(&h, worker);
 
     qDebug() << "parse dir finished";
+    pathes = filePathes;
     return files;
 }

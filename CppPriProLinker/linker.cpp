@@ -19,12 +19,16 @@ QString Linker::findFilePathForRef(
         if (not refTextWithSlash.startsWith('/'))
             refTextWithSlash.insert(0, '/');
         QStringList blackList;
-        return findFilePathByRefEnd(folderPath, refTextWithSlash, blackList);
+        const QString res = findFilePathByRefEnd(folderPath, refTextWithSlash, blackList);
+        return res;
     } else if (refType == RefType::Pro){
         QString absPath = refText;
         absPath.replace("$$PWD", "");
+        if (not absPath.startsWith('/'))
+            absPath.insert(0, '/');
         absPath = folderPath + absPath;
-        return QDir::cleanPath(absPath);
+        const QString res = QDir::cleanPath(absPath);
+        return res;
     } else
         return QString();
 }
@@ -65,8 +69,7 @@ QString Linker::findFilePathByRefEnd(
     folderBlackList << currentFolderPath;
     for (const QString &f : foldersToCheck)
         if (not folderBlackList.contains(f)){
-            const QString res = findFilePathByRefEnd(
-                        f, searchingForEnd, folderBlackList);
+            const QString res = findFilePathByRefEnd(f, searchingForEnd, folderBlackList);
             if (not res.isEmpty())
                 return res;
         }
