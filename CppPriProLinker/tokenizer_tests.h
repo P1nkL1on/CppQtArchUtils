@@ -15,10 +15,12 @@ private slots:
     void headerEmptyData();
     void headerBracketsAndOtherCode();
     void headerCommentsMasking();
+    void compareProTokens();
 protected:
     struct HeaderTokenizer
     {
-        HeaderTokenizer();
+        enum TpkenizerType {Cpp, Pro};
+        HeaderTokenizer(TpkenizerType type = Cpp);
         ~HeaderTokenizer();
         void tokenizeAndCache(
             const PlainFileData &data);
@@ -26,6 +28,7 @@ protected:
         QVector<Token> cachedTokens;
         QVector<int> cachedTypes;
         QStringList cachedTexts;
+        QString cachedString;
     };
 };
 

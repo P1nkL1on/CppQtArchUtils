@@ -1,0 +1,74 @@
+7:CONFIG4:+=
+7:c++11
+7:console
+6:
+7:CONFIG4:-=
+7:app_bundle
+6:
+6:
+0:# The following define makes your compiler emit warnings if you use
+6:
+0:# any Qt feature that has been marked deprecated (the exact warnings
+6:
+0:# depend on your compiler). Please consult the documentation of the
+6:
+0:# deprecated API in order to know how to port your code away from it.
+6:
+7:DEFINES4:+=
+7:QT_DEPRECATED_WARNINGS6:
+6:
+0:# You can also make your code fail to compile if it uses deprecated APIs.
+6:
+0:# In order to do so, uncomment the following line.
+6:
+0:# You can also select to disable deprecated APIs only up to a certain version of Qt.
+6:
+0:#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+6:
+6:
+1:win32 
+2:{
+6:
+0:# Special include for Windows option
+6:
+7:QT
+4:+=
+7:winextras
+6:
+7:include
+7:$$PWD/SpecialWind32.pri
+6:
+3:}
+6:
+6:
+7:include
+7:$$PWD/../TokenizerTests/test.pri
+6:
+7:include
+7:$$PWD/../../CppPriProLinker/TokenizerTests2/test2.pri
+6:
+6:
+7:SOURCES
+4:+=
+5:\\
+
+7:main.cpp
+6:
+6:
+0:# Default rules for deployment.
+6:
+1:qnx:
+7:target.path
+4:=
+7:/tmp/$${TARGET}/bin
+6:
+1:else: unix:!android:
+7:target.path
+4:=
+7:/opt/$${TARGET}/bin
+6:
+1:!isEmpty(target.path):
+7:INSTALLS
+4:+=
+7:target
+6:

@@ -1,4 +1,5 @@
 #include "tokenizer_tests.h"
+#include "token_parser.h"
 #include <QtTest>
 
 TokenizerTests::TokenizerTests(QObject *parent) :
@@ -57,8 +58,26 @@ void TokenizerTests::headerCommentsMasking()
     QCOMPARE(t.cachedTypes, expectedTokenTypes);
 }
 
-TokenizerTests::HeaderTokenizer::HeaderTokenizer() :
-    tokenizer(Tokenizer::cppTokenizer())
+void TokenizerTests::compareProTokens()
+{
+    HeaderTokenizer t(HeaderTokenizer::Pro);
+    PlainFileData data;
+    QString err;
+    const bool isOk = TokenParser::readPlainFileData(":/test.pro", data, err);
+    QVERIFY(isOk);
+    QVERIFY(err.isEmpty());
+    t.tokenizeAndCache(data);
+
+    PlainFileData epxectedData;
+    TokenParser::readPlainFileData(":/test_res.txt", epxectedData, err);
+    QVERIFY(err.isEmpty());
+
+    QCOMPARE(t.cachedString, epxectedData);
+}
+
+TokenizerTests::HeaderTokenizer::HeaderTokenizer(TpkenizerType type) :
+    tokenizer(type == Cpp ? Tokenizer::cppTokenizer()
+                          : Tokenizer::proTokenizer())
 {
 }
 
@@ -74,5 +93,8 @@ void TokenizerTests::HeaderTokenizer::tokenizeAndCache(const PlainFileData &data
     for (const Token &token : cachedTokens){
         cachedTypes << token.type;
         cachedTexts << token.text;
+        cachedString += QString("%1:%2")
+                .arg(token.type)
+                .arg(token.text);
     }
 }

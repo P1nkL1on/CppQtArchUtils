@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>test.h</file>
+        <file>test.pri</file>
+        <file>test2.pri</file>
+        <file>test.pro</file>
+        <file>test_res.txt</file>
+    </qresource>
+</RCC>

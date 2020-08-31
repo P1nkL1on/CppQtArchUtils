@@ -77,4 +77,5 @@ HEADERS += \
 
 RESOURCES += \
     FileTempaltes/filetemplates.qrc \
-    FileTempaltesTests/filetemplatestests.qrc
+    FileTempaltesTests/filetemplatestests.qrc \
+    TokenizerTests/tokenizertests.qrc
