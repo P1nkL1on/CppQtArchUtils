@@ -5,7 +5,7 @@
 #include <QDirIterator>
 #include <QElapsedTimer>
 #include <QDebug>
-
+#include <QApplication>
 
 Form2::Form2(QWidget *parent) :
     QMainWindow(parent)
@@ -16,192 +16,55 @@ Form2::Form2(QWidget *parent) :
     layout->addWidget(m_filesList = new QListWidget, 1);
     m_filesList->setFocusPolicy(Qt::NoFocus);
 
-//    layout->addWidget(m_fileText = new QPlainTextEdit, 1);
-//    m_fileText->setReadOnly(true);
-
     layout->addWidget(m_resultText = new QTextBrowser, 1);
     m_resultText->setReadOnly(true);
 
-
-//    layout->addWidget(m_tokenText = new QPlainTextEdit, 1);
-//    m_tokenText->setReadOnly(true);
     setCentralWidget(centralWidget);
-
-
-
 }
 
 Form2::~Form2()
 {
 }
 
-void Form2::run(const QString &dir, const QStringList &fileWildCards)
+void Form2::run(const QString &dir, const QString &lookUpDir, const QStringList &fileWildCards)
 {
-    FileScanner s;
-    QStringList pathes;
-    QVector<File *> fs = s.parseDir(dir, fileWildCards, this, pathes);
+    FileScanner scanner(fileWildCards);
+    const QStringList allPathes = scanner.scanDir(lookUpDir);
+    scanner.addScannedFilePathes(allPathes);
 
-    // m_resultText->setPlainText("");
+    const QStringList wantPathes = scanner.scanDir(dir);
+    QStringList toParse = wantPathes;
 
-    m_filesList->addItems(pathes);
+    while (1){
+        const int cached = scanner.cacheFiles(toParse);
+        if (not cached)
+            break;
+        toParse.clear();
+        scanner.link(toParse);
+        QApplication::processEvents();
+    }
+
+    QStringList cachedPathes;
+    for (const QString &path : scanner.scannedFilePathes())
+        if (scanner.isCached(path))
+            cachedPathes << path;
+
+    m_filesList->addItems(cachedPathes);
     connect(m_filesList, &QListWidget::itemPressed, this, [=](QListWidgetItem *item){
         const QString filePath = item->text();
-        const int ind = pathes.indexOf(filePath);
-        Q_ASSERT(ind >= 0);
-        File *f = fs[ind];
+        File *f = scanner.cachedFile(filePath);
 
         QString text = QString("Path: %1\n\nLinks:\n").arg(filePath);
-        for (const RefFile &ref : f->m_refToFileHash.keys()){
-            File *d = f->m_refToFileHash[ref];
-            const QString refPath = d ? pathes[fs.indexOf(d)] : "?";
-            text += QString("    %1 -> %2\n")
+        const auto hash = scanner.preLinkHash(filePath);
+        for (const RefFile &ref : hash.keys()){
+            const QString path = hash.value(ref);
+            const QString str = path.isEmpty() ? "??" : path;
+            text += QString("%3\t%1 -> %2\n")
                     .arg(ref.text)
-                    .arg(refPath);
+                    .arg(str)
+                    .arg(f->m_refToFileHash.value(ref, nullptr) ? "YES" : "");
         }
         m_resultText->setText(text);
     });
+
 }
-
-//void Form2::startDeprecated()
-//{
-////    Tokenizer tokenizer = Tokenizer::proTokenizer();
-//    QDirIterator dirIterator(
-//                "/home/alex/R3DS/Applications",
-////                "/home/alex/jff/",
-//                QStringList{"*.pri", "*.pro"},
-//                QDir::Files,
-//                QDirIterator::Subdirectories);
-
-////    int totalLoadingTime = 0;
-////    int totalTokenizingTime = 0;
-////    while (dirIterator.hasNext()){
-////        const auto path = dirIterator.next();
-////        int loadingTime, tokenizingTime;
-////        tokenize(path, tokenizer, loadingTime, tokenizingTime);
-
-////        totalLoadingTime += loadingTime;
-////        totalTokenizingTime += tokenizingTime;
-////        qDebug() << dirIterator.fileInfo().fileName() << "Loading:" << loadingTime << "Tokenizing:" << tokenizingTime;
-////    }
-////    qDebug() << "Total loading:" << totalLoadingTime << "Total tokenizing:" << totalTokenizingTime;
-////    return;
-
-//    QStringList filePathes;
-//    while (dirIterator.hasNext())
-//        filePathes << dirIterator.next();
-
-//    m_filesList->addItems(filePathes);
-//    connect(m_filesList, &QListWidget::itemPressed, this, [=](QListWidgetItem *item){
-////        m_fileText->clear();
-//        m_resultText->clear();
-
-
-////        PlainFileData text;
-////        QString err;
-////        if (not TokenParser::readPlainFileData(filePath, text, err)){
-////            m_resultText->setPlainText(QString("Loading error: %1").arg(err));
-////            return;
-////        }
-////        const QVector<Token> tokens = tokenizer.tokenize(text);
-
-////        QString guard;
-////        QVector<RefFile> includes;
-////        QVector<RefClass> classes;
-////        TokenParser::parseCpp(tokens, includes, classes, guard);
-
-////        QString includesStr;
-////        for (const RefFile &i: includes)
-////            includesStr += "    " + i + "\n";
-////        QString classesStr;
-////        for (const RefClass &i: classes)
-////            classesStr += "    " + i + "\n";
-////        m_resultText->setPlainText(QString("Guard: %1\n\nLinks:\n%2\nClasses:\n%3")
-////                                   .arg(guard).arg(includesStr).arg(classesStr));
-
-////        QVector<RefFile> includes;
-////        QVector<ProConfig> configs;
-////        TokenParser::parsePro(tokens, configs, includes);
-////        QString includesStr;
-////        for (const RefFile &i: includes)
-////            includesStr += "    " + i + "\n";
-////        m_resultText->setPlainText(QString("Links:\n%1").arg(includesStr));
-
-////        m_fileText->setPlainText(text);
-
-////        QString tokensStr;
-////        for (const Token &token : tokens)
-////            tokensStr += QString("%1:  \t%2\n")
-////                    .arg(int(token.type))
-////                    .arg(token.text);
-
-////        m_tokenText->setPlainText(tokensStr);
-//    });
-//}
-
-//File * Form2::read(
-//        const QString &filePath,
-//        QString &err,
-//        int &readingTime,
-//        int &tokenizeTime,
-//        int &parsingTime) const
-//{
-//}
-
-//void Form2::run(const QString &dir)
-//{
-//    Dialog *d = new DialogProgress(this, DialogProgress::TimeAndProgressAndTerminate);
-
-//    qDebug() << d->exec();
-//    return;
-
-//    QStringList extMasks;
-//    for (const QString &s : m_extToFileFactoryHash.keys())
-//        extMasks << "*." + s;
-//    QDirIterator dirIterator(
-//                dir,
-//                extMasks,
-//                QDir::Files,
-//                QDirIterator::Subdirectories);
-//    while (dirIterator.hasNext()){
-//        const QString path = dirIterator.next();
-//        QString err;
-//        int a, b, c;
-//        File *file = read(path, err, a, b, c);
-//        m_absPathToFileHash.insert(path, file);
-//        if (file == nullptr){
-//            m_absPathToFilePreview.insert(path, err);
-//            continue;
-//        }
-//        QString preview;
-//        for (const RefFile &ref : file->refs.keys()){
-//            File *f = file->refs.value(ref);
-//            preview += QString("%1 -> %2\n")
-//                    .arg(ref).arg(f ? "ok" : "?");
-//        }
-//        m_absPathToFilePreview.insert(path, preview);
-//    }
-//    m_filesList->addItems(m_absPathToFilePreview.keys());
-//    connect(m_filesList, &QListWidget::itemPressed, this, [=](QListWidgetItem *item){
-//        m_resultText->setPlainText(m_absPathToFilePreview.value(item->text()));
-//    });
-//}
-
-//QVector<Token> Form2::tokenize(
-//        const QString &filePath,
-//        const Tokenizer &tokenizer,
-//        int &loadingTime,
-//        int &tokenizingTime)
-//{
-////    QElapsedTimer timer;
-////    timer.start();
-////    PlainFileData text;
-////    QString err;
-////    const bool isOk = TokenParser::readPlainFileData(filePath, text, err);
-////    loadingTime = timer.elapsed();
-////    Q_ASSERT(isOk);
-
-////    timer.restart();
-////    const QVector<Token> tokens = tokenizer.tokenize(text);
-////    tokenizingTime = timer.elapsed();
-////    return tokens;
-//}

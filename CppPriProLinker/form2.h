@@ -17,8 +17,7 @@ class Form2 : public QMainWindow
 public:
     Form2(QWidget *parent = nullptr);
     ~Form2();
-    void run(
-            const QString &dir,
+    void run(const QString &dir, const QString &lookUpDir,
             const QStringList &fileWildCards);
 //    File *read(
 //            const QString &filePath,

@@ -2,7 +2,7 @@
 
 #include <QDir>
 
-Linker::Linker(const QStringList &absFilePathes)
+void Linker::addFiles(const QStringList &absFilePathes)
 {
     for (const QString &filePath : absFilePathes)
         addFolderByFile(filePath);
@@ -33,12 +33,12 @@ QString Linker::findFilePathForRef(
         return QString();
 }
 
-bool Linker::isFolder(const QString &path) const
+bool Linker::isFolder(const QString &path)
 {
     return path.contains("/");
 }
 
-QString Linker::parentFolder(const QString &path) const
+QString Linker::parentFolder(const QString &path)
 {
     return path.mid(0, path.lastIndexOf("/"));
 }
@@ -48,9 +48,9 @@ void Linker::addFolderByFile(const QString &fileInFolderPath)
     if (not isFolder(fileInFolderPath))
         return;
     const QString folderPath = parentFolder(fileInFolderPath);
-    if (not folderToFilesPathesHash.contains(folderPath))
+    if (not m_folderToFilePathesHash.contains(folderPath))
         addFolderByFile(folderPath);
-    folderToFilesPathesHash[folderPath] << fileInFolderPath;
+    m_folderToFilePathesHash[folderPath] << fileInFolderPath;
 }
 
 QString Linker::findFilePathByRefEnd(
@@ -58,10 +58,10 @@ QString Linker::findFilePathByRefEnd(
         const QString &searchingForEnd,
         QStringList &folderBlackList) const
 {
-    const QStringList filePathesInFolder = folderToFilesPathesHash.value(currentFolderPath);
+    const QStringList filePathesInFolder = m_folderToFilePathesHash.value(currentFolderPath);
     QStringList foldersToCheck {parentFolder(currentFolderPath)};
     for (const QString &p : filePathesInFolder){
-        if (folderToFilesPathesHash.contains(p))
+        if (m_folderToFilePathesHash.contains(p))
             foldersToCheck << p;
         else if (p.endsWith(searchingForEnd))
             return p;
