@@ -47,27 +47,20 @@ void DialogProgress::setTotal(int total)
 {
     Q_ASSERT(total > 0);
     m_total = total;
-    m_progressBar->setMaximum(m_total);
+    updateForm();
 }
 
 void DialogProgress::setProgress(int progress)
 {
     Q_ASSERT(progress >= 0);
     m_progress = progress;
-    m_progressBar->setValue(m_progress);
-    const int64_t timeElapsed = m_elaspedTimer.elapsed();
-    const int64_t timeRemainig = int64_t(timeElapsed / double(progress) * (m_total - progress));
-    const QString remainigStr = formatTime(timeRemainig);
-    m_labelRemaining->setText(remainigStr);
+    updateForm();
 }
 int DialogProgress::exec()
 {
     m_isTerminated = false;
     m_timer = new QTimer(this);
-    connect(m_timer, &QTimer::timeout, this, [=]{
-        const QString elapsedStr = formatTime(m_elaspedTimer.elapsed());
-        m_labelElapsed->setText(elapsedStr);
-    });
+    connect(m_timer, &QTimer::timeout, this, &DialogProgress::updateForm);
     m_timer->start(1000);
     m_elaspedTimer.restart();
     return Dialog::exec();
@@ -92,6 +85,19 @@ void DialogProgress::closeEvent(QCloseEvent *e)
 {
     e->ignore();
     reject();
+}
+
+void DialogProgress::updateForm()
+{
+    m_progressBar->setMaximum(m_total);
+    m_progressBar->setValue(m_progress);
+    const int64_t timeElapsed = m_elaspedTimer.elapsed();
+    const int64_t timeRemainig = m_progress > 0 ?
+                int64_t(timeElapsed / double(m_progress) * (m_total - m_progress)) : 0;
+    const QString remainigStr = formatTime(timeRemainig);
+    m_labelRemaining->setText(remainigStr);
+    const QString elapsedStr = formatTime(m_elaspedTimer.elapsed());
+    m_labelElapsed->setText(elapsedStr);
 }
 
 QString DialogProgress::formatTime(int64_t ms) const

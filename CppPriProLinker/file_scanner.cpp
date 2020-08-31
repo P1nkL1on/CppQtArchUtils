@@ -59,6 +59,7 @@ QStringList FileScanner::scanDir(
 void FileScanner::addScannedFilePathes(const QStringList &files)
 {
     m_scannedPathes << files;
+    m_scannedPathes.removeDuplicates();
     m_linker.addFiles(files);
 }
 

@@ -27,27 +27,36 @@ Form2::~Form2()
 {
 }
 
-void Form2::run(const QString &dir, const QString &lookUpDir, const QStringList &fileWildCards)
+void Form2::run(
+        const QString &dir,
+        const QString &lookUpDir,
+        const QStringList &fileWildCards,
+        const QStringList &ignorePathes)
 {
-    FileScanner scanner(fileWildCards);
-    const QStringList allPathes = scanner.scanDir(lookUpDir);
-    scanner.addScannedFilePathes(allPathes);
+    FileScanner *scanner = new FileScanner(fileWildCards, ignorePathes);
+    const QStringList allPathes = scanner->scanDir(lookUpDir);
+    scanner->addScannedFilePathes(allPathes);
 
-    const QStringList wantPathes = scanner.scanDir(dir);
-    QStringList toParse = wantPathes;
+    const QStringList wantPathes = scanner->scanDir(dir);
 
-    while (1){
-        const int cached = scanner.cacheFiles(toParse);
-        if (not cached)
-            break;
-        toParse.clear();
-        scanner.link(toParse);
-        QApplication::processEvents();
-    }
+
+
+    QStringList toParse = {dir};
+    scanner->cacheFiles(toParse);
+    scanner->link(toParse);
+
+//    while (1){
+//        const int cached = scanner.cacheFiles(toParse);
+//        if (not cached)
+//            break;
+//        toParse.clear();
+//        scanner.link(toParse);
+//        QApplication::processEvents();
+//    }
 
     QStringList *cachedPathes = new QStringList;
-    for (const QString &path : scanner.scannedFilePathes())
-        if (scanner.isCached(path))
+    for (const QString &path : scanner->scannedFilePathes())
+        if (scanner->isCached(path))
             cachedPathes->append(path);
 
     m_filesList->addItems(*cachedPathes);
@@ -57,7 +66,7 @@ void Form2::run(const QString &dir, const QString &lookUpDir, const QStringList 
             return;
         }
         const QString filePath = m_filesList->currentItem()->text();
-        const auto hash = scanner.preLinkHash(filePath);
+        const auto hash = scanner->preLinkHash(filePath);
 
         QString s;
         QString err;
@@ -79,6 +88,7 @@ void Form2::run(const QString &dir, const QString &lookUpDir, const QStringList 
             const QString link = formats.value(pos);
             const QString text = s.mid(prev, pos - prev);
             format.setAnchorHref(link);
+            format.setFont(QFont("Courier New", 20));
             m_resultText->setCurrentCharFormat(format);
             cursor.insertText(text, format);
             prev = pos;
@@ -89,9 +99,21 @@ void Form2::run(const QString &dir, const QString &lookUpDir, const QStringList 
         qDebug() << r;
     });
     connect(m_resultText, &QTextBrowser::anchorClicked, this, [=](const QUrl &r){
-        const QStringList list = *cachedPathes;
+        const QStringList alreadyCached = *cachedPathes;
         const QString url = r.url();
-        const int index = list.indexOf(url);
+        int index = alreadyCached.indexOf(url);
+        if (index < 0){
+            QStringList toParse = {url};
+            scanner->cacheFiles(toParse);
+            scanner->link(toParse);
+            QStringList *cachedPathes = new QStringList;
+            for (const QString &path : scanner->scannedFilePathes())
+                if (scanner->isCached(path))
+                    cachedPathes->append(path);
+            m_filesList->clear();
+            m_filesList->addItems(*cachedPathes);
+            index = cachedPathes->indexOf(url);
+        }
         m_filesList->setCurrentRow(index);
     });
     m_resultText->setOpenLinks(false);

@@ -9,8 +9,8 @@ class FileScanner
 {
 public:
     FileScanner(
-            const QStringList &fileWildCards = {"*.pro", "*.pri", "*.h", "*.cpp"},
-            const QStringList &ignoreFilesMasks = {"build-", "moc_"});
+            const QStringList &fileWildCards,
+            const QStringList &ignoreFilesMasks);
     ~FileScanner();
 
     void addScannedFilePathes(const QStringList &files);

@@ -31,6 +31,7 @@ public:
     ~DialogProgress() override;
     void setTotal(int total);
 public slots:
+    void updateForm();
     void setProgress(int progress);
     void reject() override;
     int exec() override;
