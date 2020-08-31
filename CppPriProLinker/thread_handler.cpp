@@ -42,7 +42,7 @@ void ThreadHandler::startWorker(ThreadWorker *worker)
     worker->moveToThread(m_thread);
     QObject::connect(m_thread, &QThread::started, worker, &ThreadWorker::run);
     QObject::connect(worker, &ThreadWorker::finished, worker, [=]{
-        delete worker;
+        worker->deleteLater();
         freeThread();
         m_isWorking = false;
     });

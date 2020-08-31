@@ -128,7 +128,7 @@ RefFile TokenParser::includeTokenToRawRef(
     const QString linkWithBracketsText = token.text.split(' ', QString::SkipEmptyParts).last();
     const QString linkText = linkWithBracketsText.mid(1, linkWithBracketsText.length() - 2);
     const bool isSystem = not linkWithBracketsText.startsWith("\"");
-    return RefFile(token.pos, linkText, isSystem);
+    return RefFile(token.pos + token.text.indexOf(linkText), linkText, isSystem);
 }
 
 RefClass TokenParser::classTokenToRawRef(
