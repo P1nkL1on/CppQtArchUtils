@@ -13,6 +13,7 @@ SOURCES += \
     dialog_progress.cpp \
     file_cpp.cpp \
     file_cpp_factory.cpp \
+    file_factory.cpp \
     file_pro.cpp \
     file_pro_factory.cpp \
     file_scanner.cpp \

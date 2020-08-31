@@ -2,15 +2,16 @@
 #define FILEPROFACTORY_H
 
 #include "file_factory.h"
-#include "tokenizer.h"
 
 class FileProFactory : public FileFactory
 {
 public:
     FileProFactory() = default;
-    File *read(const QString &filePath, QString &err) const override;
 protected:
-    Tokenizer m_tokenizer = Tokenizer::proTokenizer();
+    Tokenizer tokenizer() const override;
+    File * createFile(
+            const QFileInfo &info,
+            const QVector<Token> &tokens) const override;
 };
 
 
