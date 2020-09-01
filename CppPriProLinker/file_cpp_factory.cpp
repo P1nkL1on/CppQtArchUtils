@@ -8,7 +8,7 @@ Tokenizer FileCppFactory::tokenizer() const
     return Tokenizer::cppTokenizer();
 }
 
-File *FileCppFactory::createFile(const QVector<Token> &tokens) const
+File *FileCppFactory::parseFileFromTokens(const QVector<Token> &tokens) const
 {
     QVector<RefFile> rawRefFiles;
     QVector<RefClass> refClasses;

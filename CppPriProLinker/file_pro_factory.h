@@ -9,7 +9,7 @@ public:
     FileProFactory() = default;
 protected:
     Tokenizer tokenizer() const override;
-    File * createFile(const QVector<Token> &tokens) const override;
+    File * parseFileFromTokens(const QVector<Token> &tokens) const override;
 };
 
 

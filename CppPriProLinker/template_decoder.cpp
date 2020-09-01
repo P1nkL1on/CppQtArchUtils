@@ -150,6 +150,8 @@ TemplateDecoder TemplateDecoder::proDecoder(const QStringList &proRelativePathes
 {
     TemplateDecoder decoder;
 
+    const QString tabString = QString().leftJustified(tabSpaceCount, ' ');
+
     // FILE BLOCKS
     const QHash<QString, QStringList> blockNameToFileNames = {
         {"HS", headerRelativePathes},
@@ -172,8 +174,8 @@ TemplateDecoder TemplateDecoder::proDecoder(const QStringList &proRelativePathes
             QString("%1$%2_NEWLINE_START")
                     .arg(blockTitle).arg(blockName),
             "$REPEAT",
-            QString("\t%2$%1_RELATIVE_PATHES$%1_LINE_SEPARATORS")
-                    .arg(blockName).arg(pwdStr),
+            QString("%3%2$%1_RELATIVE_PATHES$%1_LINE_SEPARATORS")
+                    .arg(blockName).arg(pwdStr).arg(tabString),
             "$END"
         };
         for (int i = 0; i < newLinesBetweenBlocks; ++i)
@@ -211,12 +213,5 @@ TemplateDecoder TemplateDecoder::proDecoder(const QStringList &proRelativePathes
         decoder.setVariableToStringList("$PRI_RELATIVE_PATHES", priRelativePathes);
     };
     addPris(proRelativePathes);
-
-    // MISC OPTIONS
-    // todo move it to the inner method of decoder
-    // because now it can replaces tabs in the middle and end of line
-    // but only at the line start its is required
-    decoder.setVariableToString("\t", QString().leftJustified(tabSpaceCount, ' '));
-
     return decoder;
 }

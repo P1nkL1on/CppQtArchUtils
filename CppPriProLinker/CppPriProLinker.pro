@@ -39,7 +39,8 @@ SOURCES += \
     thread_worker_lambda.cpp \
     tokenizer.cpp \
     token_parser.cpp \
-    tokenizer_tests.cpp
+    tokenizer_tests.cpp \
+    file_generator.cpp
 
 HEADERS += \
     dialog.h \
@@ -73,7 +74,8 @@ HEADERS += \
     token.h \
     tokenizer.h \
     token_parser.h \
-    tokenizer_tests.h
+    tokenizer_tests.h \
+    file_generator.h
 
 RESOURCES += \
     FileTempaltes/filetemplates.qrc \

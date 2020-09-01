@@ -4,7 +4,7 @@
 #include "token.h"
 #include "token_parser.h"
 
-File *FileFactory::read(
+File *FileFactory::parse(
         const QString &filePath,
         QString &err) const
 {
@@ -12,5 +12,5 @@ File *FileFactory::read(
     if (not TokenParser::readPlainFileData(filePath, data, err))
         return nullptr;
     const QVector<Token> tokens = tokenizer().tokenize(data);
-    return createFile(tokens);
+    return parseFileFromTokens(tokens);
 }

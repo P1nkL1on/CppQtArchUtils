@@ -173,7 +173,7 @@ ThreadWorker *FileScanner::createParseFilesWorkerWithContext(const QStringList &
         if (not factory)
             return QString("No factory found for %1!").arg(filePath);
         QString err;
-        File *file = factory->read(filePath, err);
+        File *file = factory->parse(filePath, err);
         if (not file or not err.isEmpty())
             return err;
         parsingFiles->replace(i, file);
