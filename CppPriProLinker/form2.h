@@ -6,6 +6,7 @@
 #include <QTextBrowser>
 #include <QListWidget>
 #include "file_scanner.h"
+#include "textbrowser_links.h"
 
 class Token;
 class Tokenizer;
@@ -24,12 +25,12 @@ public:
     void addLinkerLookUpFolder(const QString &dir);
     void run(const QStringList &filePathes);
 protected:
-    void onLinkHighlighted(const QUrl &url);
-    void onLinkClicked(const QUrl &url);
+    void onRefClicked(const RefFile &refFile);
     void onListItemSelectionChanged();
     QStringList m_nameFilters;
     QStringList m_nameIgnore;
     QStringList m_parsedFiles;
+    QString m_currentFilePath;
 
     FileScanner *m_scanner = nullptr;
     Linker *m_linker = nullptr;
@@ -37,6 +38,7 @@ protected:
     QListWidget *m_filesList = nullptr;
     QPlainTextEdit *m_fileText = nullptr;
     QTextBrowser *m_resultText = nullptr;
+    TextBrowserLinks *m_resultText2 = nullptr;
     QPlainTextEdit *m_tokenText = nullptr;
 };
 

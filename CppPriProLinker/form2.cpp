@@ -29,12 +29,11 @@ Form2::Form2(
     connect(m_filesList, &QListWidget::itemSelectionChanged, this, &Form2::onListItemSelectionChanged);
 
     m_filesList->setFocusPolicy(Qt::NoFocus);
-    layout->addWidget(m_resultText = new QTextBrowser, 1);
-    m_resultText->setReadOnly(true);
-    m_resultText->setOpenLinks(false);
-    m_resultText->setOpenExternalLinks(false);
-    connect(m_resultText, QOverload<const QUrl &>::of(&QTextBrowser::highlighted), this, &Form2::onLinkHighlighted);
-    connect(m_resultText, &QTextBrowser::anchorClicked, this, &Form2::onLinkClicked);
+
+    m_resultText2 = new TextBrowserLinks;
+    connect(m_resultText2, &TextBrowserLinks::refClicked, this, &Form2::onRefClicked);
+    layout->addWidget(m_resultText2, 1);
+
 
     setCentralWidget(centralWidget);
 }
@@ -65,14 +64,14 @@ void Form2::run(const QStringList &filePathes)
     }, FileScanner::InBackground);
 }
 
-void Form2::onLinkHighlighted(const QUrl &url)
+void Form2::onRefClicked(const RefFile &refFile)
 {
-
-}
-
-void Form2::onLinkClicked(const QUrl &url)
-{
-    const QString text = url.url();
+    if (m_currentFilePath.isEmpty())
+        return;
+    const QHash<RefFile, QString> hash = m_scanner->parsedRefHash(m_currentFilePath);
+    const QString text = hash.value(refFile);
+    if (text.isEmpty())
+        return;
     int index = m_parsedFiles.indexOf(text);
     if (index >= 0){
         m_filesList->setCurrentRow(index);
@@ -84,35 +83,18 @@ void Form2::onLinkClicked(const QUrl &url)
 void Form2::onListItemSelectionChanged()
 {
     if (m_filesList->currentRow() < 0){
-        m_resultText->clear();
+        m_currentFilePath.clear();
+        m_resultText2->clear();
         return;
     }
     const QString filePath = m_filesList->currentItem()->text();
-    const auto hash = m_scanner->parsedRefHash(filePath);
+    const QHash<RefFile, QString> hash = m_scanner->parsedRefHash(filePath);
 
     QString s;
     QString err;
     FileIO::readPlainFileData(filePath, s, err);
 
-    m_resultText->document()->clear();
-    QTextCursor cursor(m_resultText->document());
-    QMap<int, QString> formats;
-    for (const RefFile &ref : hash.keys()){
-        QTextCharFormat linkFormat = cursor.charFormat();
-        const QString path = hash.value(ref);
-        formats.insert(ref.pos, "");
-        formats.insert(ref.pos + ref.text.size(), path);
-    }
-    formats.insert(s.size() - 1, {});
-    int prev = 0;
-    for (int pos : formats.keys()){
-        QTextCharFormat format;
-        const QString link = formats.value(pos);
-        const QString text = s.mid(prev, pos - prev);
-        format.setAnchorHref(link);
-        format.setFont(QFont("Courier New", 14));
-        m_resultText->setCurrentCharFormat(format);
-        cursor.insertText(text, format);
-        prev = pos;
-    }
+    m_resultText2->setRefs(hash.keys());
+    m_resultText2->setText(s);
+    m_currentFilePath = filePath;
 }

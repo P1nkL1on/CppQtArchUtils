@@ -32,6 +32,7 @@ SOURCES += \
     file.cpp \
     form2.cpp \
     template_loader_tests.cpp \
+    textbrowser_links.cpp \
     thread_handler.cpp \
     thread_handler_dialog.cpp \
     thread_utils.cpp \
@@ -68,6 +69,7 @@ HEADERS += \
     file_data.h \
     form2.h \
     template_loader_tests.h \
+    textbrowser_links.h \
     thread_handler.h \
     thread_handler_dialog.h \
     thread_utils.h \
