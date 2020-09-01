@@ -1,33 +1,8 @@
 #include "token_parser.h"
 
-#include <QFile>
-#include <QFileInfo>
 #include <QVector>
 
 #include "file_pro.h"
-
-bool TokenParser::readPlainFileData(
-        const QString &filePath,
-        PlainFileData &data,
-        QString &errMessage)
-{
-    QFileInfo info(filePath);
-    if (not info.exists()){
-        errMessage = QString("File doen't exist! %1").arg(filePath);
-        return false;
-    }
-    QFile file(filePath);
-    if (not file.open(QIODevice::ReadOnly)){
-        errMessage = QString("File can't be readen! %1").arg(filePath);
-        return false;
-    }
-    const QByteArray byteData = file.readAll();
-    file.close();
-    data = QString(byteData);
-    errMessage = QString();
-    return true;
-}
-
 
 const QStringList blockIdentifiers {
     "namespace", "class", "struct", "enum"

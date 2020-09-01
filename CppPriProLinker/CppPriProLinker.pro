@@ -14,6 +14,7 @@ SOURCES += \
     file_cpp.cpp \
     file_cpp_factory.cpp \
     file_factory.cpp \
+    file_io.cpp \
     file_pro.cpp \
     file_pro_factory.cpp \
     file_scanner.cpp \
@@ -49,6 +50,7 @@ HEADERS += \
     file_cpp.h \
     file_cpp_factory.h \
     file_factory.h \
+    file_io.h \
     file_pro.h \
     file_pro_factory.h \
     file_scanner.h \

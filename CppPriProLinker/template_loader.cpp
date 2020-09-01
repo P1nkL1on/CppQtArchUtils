@@ -15,7 +15,7 @@ bool TemplateLoader::readTemplate(const QString &templateName, PlainFileData &da
 {
     Q_ASSERT(hasTemplate(templateName));
     const QString filePath = m_templateNameToPathMap.value(templateName);
-    return TokenParser::readPlainFileData(filePath, data, errMessage);
+    return FileIO::readPlainFileData(filePath, data, errMessage);
 }
 
 bool TemplateLoader::hasTemplate(const QString &templateName) const

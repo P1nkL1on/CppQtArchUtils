@@ -1,5 +1,5 @@
 #include "tokenizer_tests.h"
-#include "token_parser.h"
+#include "file_io.h"
 #include <QtTest>
 
 TokenizerTests::TokenizerTests(QObject *parent) :
@@ -63,13 +63,13 @@ void TokenizerTests::compareProTokens()
     HeaderTokenizer t(HeaderTokenizer::Pro);
     PlainFileData data;
     QString err;
-    const bool isOk = TokenParser::readPlainFileData(":/test.pro", data, err);
+    const bool isOk = FileIO::readPlainFileData(":/test.pro", data, err);
     QVERIFY(isOk);
     QVERIFY(err.isEmpty());
     t.tokenizeAndCache(data);
 
     PlainFileData epxectedData;
-    TokenParser::readPlainFileData(":/test_res.txt", epxectedData, err);
+    FileIO::readPlainFileData(":/test_res.txt", epxectedData, err);
     QVERIFY(err.isEmpty());
 
     QCOMPARE(t.cachedString, epxectedData);

@@ -22,7 +22,7 @@ public:
     ~Form2();
 
     void addLinkerLookUpFolder(const QString &dir);
-    void run(const QString &dir);
+    void run(const QStringList &filePathes);
 protected:
     void onLinkHighlighted(const QUrl &url);
     void onLinkClicked(const QUrl &url);

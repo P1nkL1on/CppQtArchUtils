@@ -6,7 +6,7 @@
 #include <QElapsedTimer>
 #include <QDebug>
 #include <QApplication>
-#include "token_parser.h"
+#include "file_io.h"
 
 Form2::Form2(
         FileScanner *scanner,
@@ -53,19 +53,16 @@ void Form2::addLinkerLookUpFolder(const QString &dir)
     m_linker->addFilePathes(pathes);
 }
 
-void Form2::run(const QString &dir)
+void Form2::run(const QStringList &filePathes)
 {
-//    const QStringList files = {dir};
-    const QStringList files = m_scanner->filePathesInDir(
-                dir, m_nameFilters, m_nameIgnore);
-    m_scanner->parseFiles(files, [=]{
+    m_scanner->parseFiles(filePathes, [=]{
         QStringList yetToParse;
         m_scanner->tryLinkRefs(yetToParse);
 
         m_parsedFiles = m_scanner->parsedFilePathes();
         m_filesList->clear();
         m_filesList->addItems(m_parsedFiles);
-    }, FileScanner::WithDialog);
+    }, FileScanner::InBackground);
 }
 
 void Form2::onLinkHighlighted(const QUrl &url)
@@ -81,18 +78,7 @@ void Form2::onLinkClicked(const QUrl &url)
         m_filesList->setCurrentRow(index);
         return;
     }
-
-    run(text);
-//    if (index < 0){
-//        return;
-//        QStringList toParse = {text};
-//        m_scanner->parseFiles(toParse);
-//        m_scanner->link(toParse);
-//        m_filesList->clear();
-//        *cachedPathes = m_scanner->parsedFilePathes();
-//        m_filesList->addItems(*cachedPathes);
-//        index = cachedPathes->indexOf(url);
-//    }
+    run({text});
 }
 
 void Form2::onListItemSelectionChanged()
@@ -106,7 +92,7 @@ void Form2::onListItemSelectionChanged()
 
     QString s;
     QString err;
-    TokenParser::readPlainFileData(filePath, s, err);
+    FileIO::readPlainFileData(filePath, s, err);
 
     m_resultText->document()->clear();
     QTextCursor cursor(m_resultText->document());
