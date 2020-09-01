@@ -9,14 +9,17 @@
 #include "token_parser.h"
 
 Form2::Form2(
-        const QStringList &fileWildCards,
-        const QStringList &ignorePathes,
+        FileScanner *scanner,
+        Linker *linker,
+        const QStringList &nameFilters,
+        const QStringList &nameIgnore,
         QWidget *parent) :
-    QMainWindow(parent)
+    QMainWindow(parent),
+    m_nameFilters(nameFilters),
+    m_nameIgnore(nameIgnore),
+    m_scanner(scanner),
+    m_linker(linker)
 {
-    m_scanner = new FileScanner(fileWildCards, ignorePathes);
-
-
     // layout
     QWidget *centralWidget = new QWidget;
     QHBoxLayout *layout = new QHBoxLayout;
@@ -45,19 +48,24 @@ void Form2::addLinkerLookUpFolder(const QString &dir)
     QFileInfo info(dir);
     Q_ASSERT(info.isDir());
 
-    const QStringList pathes = m_scanner->filePathesInDir(dir);
-    m_scanner->addLinkerFilePathes(pathes);
+    const QStringList pathes = m_scanner->filePathesInDir(
+                dir, m_nameFilters, m_nameIgnore);
+    m_linker->addFilePathes(pathes);
 }
 
 void Form2::run(const QString &dir)
 {
-    m_scanner->parseFiles({dir}, [=]{
+//    const QStringList files = {dir};
+    const QStringList files = m_scanner->filePathesInDir(
+                dir, m_nameFilters, m_nameIgnore);
+    m_scanner->parseFiles(files, [=]{
         QStringList yetToParse;
-        m_scanner->link(yetToParse);
+        m_scanner->tryLinkRefs(yetToParse);
 
         m_parsedFiles = m_scanner->parsedFilePathes();
+        m_filesList->clear();
         m_filesList->addItems(m_parsedFiles);
-    });
+    }, FileScanner::WithDialog);
 }
 
 void Form2::onLinkHighlighted(const QUrl &url)

@@ -3,19 +3,23 @@
 
 #include <QStringList>
 #include <QHash>
+#include "ref_file.h"
 
 class Linker
 {
 public:
-    enum class RefType {Cpp, Pro};
     Linker() = default;
-    void addFiles(const QStringList &absFilePathes);
+    void addFilePathes(const QStringList &absFilePathes);
     QString findFilePathForRef(
-            const QString &filePath,
-            const QString &refText,
-            RefType refType) const;
+            const QString &origFilePath,
+            const QString &refText) const;
+    QString findFilePathForRef(
+            const QString &origFilePath,
+            const RefFile &ref) const;
 protected:
     void addFolderByFile(const QString &fileInFolderPath);
+    enum FileType {Cpp, Pro};
+    static FileType typeOfFile(const QString &filePath);
     static inline bool isFolder(const QString &path);
     static inline QString parentFolder(const QString &path);
     QString findFilePathByRefEnd(

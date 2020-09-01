@@ -35,6 +35,7 @@ SOURCES += \
     thread_handler_dialog.cpp \
     thread_utils.cpp \
     thread_worker.cpp \
+    thread_worker_file_parser.cpp \
     thread_worker_interruptable.cpp \
     thread_worker_lambda.cpp \
     tokenizer.cpp \
@@ -69,6 +70,7 @@ HEADERS += \
     thread_handler_dialog.h \
     thread_utils.h \
     thread_worker.h \
+    thread_worker_file_parser.h \
     thread_worker_interruptable.h \
     thread_worker_lambda.h \
     token.h \

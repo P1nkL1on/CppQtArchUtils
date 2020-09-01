@@ -3,17 +3,13 @@
 #include <QDirIterator>
 #include <QDebug>
 
-#include "thread_worker_lambda.h"
+#include "thread_worker_file_parser.h"
 #include "thread_handler_dialog.h"
-#include "thread_utils.h"
 #include "file_cpp_factory.h"
 #include "file_pro_factory.h"
 
-FileScanner::FileScanner(
-        const QStringList &fileWildCards,
-        const QStringList &ignoreFilesMasks) :
-    m_fileWildCards(fileWildCards),
-    m_ignoreFilesMasks(ignoreFilesMasks)
+FileScanner::FileScanner(Linker *linker) :
+    m_linker(linker)
 {
     auto pros = new FileProFactory;
     auto cpps = new FileCppFactory;
@@ -26,35 +22,29 @@ FileScanner::FileScanner(
         {"pri", pros},
         {"pro", pros}
     };
-    m_threadHandler = new ThreadHandler;
 }
 
 FileScanner::~FileScanner()
 {
     for (FileFactory *f : m_factories)
         delete f;
-    delete m_threadHandler;
 }
-
-void FileScanner::addLinkerFilePathes(const QStringList &filePathes)
-{
-    m_linker.addFiles(filePathes);
-}
-
 
 QStringList FileScanner::filePathesInDir(
-        const QString &dirPath) const
+        const QString &dirPath,
+        const QStringList &nameFilters,
+        const QStringList &nameIgnores) const
 {
     QDirIterator dirIterator(
                 dirPath,
-                m_fileWildCards,
+                nameFilters,
                 QDir::Files,
                 QDirIterator::Subdirectories);
     QStringList res;
     while (dirIterator.hasNext()){
         const QString filePath = dirIterator.next();
         bool skipFile = false;
-        for (const QString &badPath : m_ignoreFilesMasks)
+        for (const QString &badPath : nameIgnores)
             if (filePath.contains(badPath)){
                 skipFile = true;
                 break;
@@ -71,27 +61,33 @@ QStringList FileScanner::parsedFilePathes() const
     return m_pathToParsedFilesHash.keys();
 }
 
-void FileScanner::parseFiles(const QStringList &filePathes, ThreadUtils::foo onFinish)
+void FileScanner::parseFiles(
+        const QStringList &filePathes,
+        ThreadUtils::foo onFinish,
+        FileScanner::ParsingMode mode)
 {
-    Q_ASSERT(not m_threadHandler->isWorking());
-    const QStringList nonParsedFilePathes = selectNotParsed(filePathes);
-    if (nonParsedFilePathes.isEmpty())
+    const QStringList notParsedFilePathes = selectNotParsed(filePathes);
+    if (notParsedFilePathes.isEmpty())
         return;
-    addLinkerFilePathes(nonParsedFilePathes);
-    ThreadWorker *worker = createParseFilesWorkerWithContext(nonParsedFilePathes);
-    ThreadUtils::runOnBackground(m_threadHandler, worker, onFinish);
-}
-
-QString FileScanner::findFilePathByRef(
-        const RefFile &ref,
-        const QString &originFilePath) const
-{
-    if (ref.isSystem)
-        return QString();
-    const Linker::RefType refType = originFilePath.endsWith(".pri") or originFilePath.endsWith(".pro") ?
-                Linker::RefType::Pro: Linker::RefType::Cpp;
-    const QString res = m_linker.findFilePathForRef(originFilePath, ref.text, refType);
-    return res;
+    ThreadWorker *worker = createWorkerWithContext(notParsedFilePathes);
+    Q_ASSERT(worker);
+    ThreadHandler *threadHandler = nullptr;
+    switch (mode){
+    case WithDialog:
+        threadHandler = new ThreadHandlerDialog;
+        break;
+    default:
+        threadHandler = new ThreadHandler;
+    }
+    switch (mode){
+    case WithEventLoop:
+        ThreadUtils::runWithEventLoop(threadHandler, worker);
+        onFinish();
+        break;
+    default:
+        ThreadUtils::runOnBackground(threadHandler, worker, onFinish);
+        break;
+    }
 }
 
 QStringList FileScanner::selectNotParsed(const QStringList &filePathes) const
@@ -104,7 +100,7 @@ QStringList FileScanner::selectNotParsed(const QStringList &filePathes) const
 }
 
 
-void FileScanner::link(QStringList &filesToParse)
+void FileScanner::tryLinkRefs(QStringList &filesToParse)
 {
     const QStringList filePathes = m_pathToParsedFilesHash.keys();
 
@@ -112,13 +108,13 @@ void FileScanner::link(QStringList &filesToParse)
         Q_ASSERT(m_pathToParsedFilesHash.contains(filePath));
         File *file = m_pathToParsedFilesHash.value(filePath, nullptr);
         Q_ASSERT(file);
-        QHash<RefFile, QString> &preLinkHash = m_pathToParsedRefHash[filePath];
-        const QList<RefFile> refs = preLinkHash.keys();
+        QHash<RefFile, QString> &refHash = m_pathToParsedRefHash[filePath];
+        const QList<RefFile> refs = refHash.keys();
         for (const RefFile &ref : refs){
-            QString &refPath = preLinkHash[ref];
+            QString &refPath = refHash[ref];
             const bool wasNotResolvedYet = refPath.isEmpty();
             if (wasNotResolvedYet)
-                refPath = findFilePathByRef(ref, filePath);
+                refPath = m_linker->findFilePathForRef(filePath, ref);
             const bool stillNotResolved = refPath.isEmpty();
             if (stillNotResolved)
                 continue;
@@ -127,7 +123,6 @@ void FileScanner::link(QStringList &filesToParse)
                 filesToParse << refPath;
                 continue;
             }
-            // preLinkHash.remove(ref);
             File *resolvedRef = m_pathToParsedFilesHash.value(refPath, nullptr);
             Q_ASSERT(resolvedRef);
             file->setRef(ref, resolvedRef);
@@ -152,55 +147,27 @@ QHash<RefFile, QString> FileScanner::parsedRefHash(const QString &filePath) cons
     return m_pathToParsedRefHash.value(filePath);
 }
 
-ThreadWorker *FileScanner::createParseFilesWorkerWithContext(const QStringList &filePathes)
+ThreadWorker *FileScanner::createWorkerWithContext(const QStringList &filePathes)
 {
     Q_ASSERT(not filePathes.isEmpty());
-    QStringList *parsingFilePathes = new QStringList;
-    *parsingFilePathes = filePathes;
-    const int filesCount = parsingFilePathes->size();
+    ThreadWorkerFileParser *worker = new ThreadWorkerFileParser(
+                m_linker,
+                m_extToFileFactoryHash,
+                filePathes);
+    QObject::connect(worker, &ThreadWorker::finished, [=]{
+        const QVector<File *> files = worker->files();
+        const QVector<QHash<RefFile, QString>> refs = worker->refs();
+        const int filesCount = filePathes.size();
+        Q_ASSERT(files.size() == filesCount);
+        Q_ASSERT(refs.size() == filesCount);
 
-    auto parsingFiles = new QVector<File *>(filesCount, nullptr);
-    auto parsingRefHashes = new QVector<QHash<RefFile, QString>>(filesCount);
-    auto worker = new ThreadWorkerLambda;
-    worker->setFailPolicy(ThreadWorker::FailPolicy::IfAllStepsFailed);
-    worker->setStepsTotal(filesCount);
-
-    worker->setStep([=](int i){
-        const QString filePath = parsingFilePathes->at(i);
-        const QFileInfo info(filePath);
-        const QString ext = info.suffix();
-        FileFactory *factory = m_extToFileFactoryHash.value(ext, nullptr);
-        if (not factory)
-            return QString("No factory found for %1!").arg(filePath);
-        QString err;
-        File *file = factory->parse(filePath, err);
-        if (not file or not err.isEmpty())
-            return err;
-        parsingFiles->replace(i, file);
-        for (const RefFile &ref : file->refs()){
-            QHash<RefFile, QString> &hash = (*parsingRefHashes)[i];
-            hash.insert(ref, findFilePathByRef(ref, filePath));
-        }
-        qDebug() << "ok" << filePath;
-        return QString();
-    });
-    worker->setFinish([=]{
-        const QVector<QString> errors = worker->errors();
         for (int fileInd = 0; fileInd < filesCount; ++fileInd){
-            // do not cache nullptr files
-            // which means has error
-            if (not parsingFiles->at(fileInd))
+            if (not files.at(fileInd))
                 continue;
-            const QString parsingFilePath = parsingFilePathes->at(fileInd);
-            m_pathToParsedFilesHash.insert(parsingFilePath, parsingFiles->at(fileInd));
-            m_pathToParsedRefHash.insert(parsingFilePath, parsingRefHashes->at(fileInd));
+            const QString parsingFilePath = filePathes.at(fileInd);
+            m_pathToParsedFilesHash.insert(parsingFilePath, files.at(fileInd));
+            m_pathToParsedRefHash.insert(parsingFilePath, refs.at(fileInd));
         }
-        delete parsingFilePathes;
-        for (File *file : *parsingFiles)
-            if (file) delete file;
-        delete parsingFiles;
-        delete parsingRefHashes;
-        Q_ASSERT(not m_pathToParsedFilesHash.contains(nullptr));
     });
     return worker;
 }

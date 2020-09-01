@@ -2,26 +2,26 @@
 
 #include <QDir>
 
-void Linker::addFiles(const QStringList &absFilePathes)
+void Linker::addFilePathes(const QStringList &absFilePathes)
 {
     for (const QString &filePath : absFilePathes)
         addFolderByFile(filePath);
 }
 
 QString Linker::findFilePathForRef(
-        const QString &filePath,
-        const QString &refText,
-        Linker::RefType refType) const
+        const QString &origFilePath,
+        const QString &refText) const
 {
-    const QString folderPath = parentFolder(filePath);
-    if (refType == RefType::Cpp){
+    const QString folderPath = parentFolder(origFilePath);
+    const FileType type = typeOfFile(origFilePath);
+    if (type == FileType::Cpp){
         QString refTextWithSlash = refText;
         if (not refTextWithSlash.startsWith('/'))
             refTextWithSlash.insert(0, '/');
         QStringList blackList;
         const QString res = findFilePathByRefEnd(folderPath, refTextWithSlash, blackList);
         return res;
-    } else if (refType == RefType::Pro){
+    } else if (type == FileType::Pro){
         QString absPath = refText;
         absPath.replace("$$PWD", "");
         if (not absPath.startsWith('/'))
@@ -31,6 +31,13 @@ QString Linker::findFilePathForRef(
         return res;
     } else
         return QString();
+}
+
+QString Linker::findFilePathForRef(const QString &origFilePath, const RefFile &ref) const
+{
+    if (ref.isSystem)
+        return QString();
+    return findFilePathForRef(origFilePath, ref.text);
 }
 
 bool Linker::isFolder(const QString &path)
@@ -51,6 +58,13 @@ void Linker::addFolderByFile(const QString &fileInFolderPath)
     if (not m_folderToFilePathesHash.contains(folderPath))
         addFolderByFile(folderPath);
     m_folderToFilePathesHash[folderPath] << fileInFolderPath;
+}
+
+Linker::FileType Linker::typeOfFile(const QString &filePath)
+{
+    if (filePath.endsWith(".pri") or filePath.endsWith(".pro"))
+        return Pro;
+    return Cpp;
 }
 
 QString Linker::findFilePathByRefEnd(

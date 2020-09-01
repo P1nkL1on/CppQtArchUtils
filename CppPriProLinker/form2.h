@@ -15,23 +15,24 @@ class Form2 : public QMainWindow
     Q_OBJECT
 
 public:
-    Form2(const QStringList &fileWildCards,
-          const QStringList &ignorePathes,
+    Form2(FileScanner *scanner, Linker *linker,
+          const QStringList &nameFilters,
+          const QStringList &nameIgnore,
           QWidget *parent = nullptr);
     ~Form2();
 
     void addLinkerLookUpFolder(const QString &dir);
     void run(const QString &dir);
-//    void run(
-//            const QString &dir,
-//            const QString &lookUpDir,
-//            );
 protected:
     void onLinkHighlighted(const QUrl &url);
     void onLinkClicked(const QUrl &url);
     void onListItemSelectionChanged();
-    FileScanner *m_scanner = nullptr;
+    QStringList m_nameFilters;
+    QStringList m_nameIgnore;
     QStringList m_parsedFiles;
+
+    FileScanner *m_scanner = nullptr;
+    Linker *m_linker = nullptr;
 
     QListWidget *m_filesList = nullptr;
     QPlainTextEdit *m_fileText = nullptr;
