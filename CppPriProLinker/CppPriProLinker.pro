@@ -55,6 +55,7 @@ HEADERS += \
     file_pro.h \
     file_pro_factory.h \
     file_scanner.h \
+    file_type.h \
     form.h \
     guard_converter.h \
     guard_converter_tests.h \

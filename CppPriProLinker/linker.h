@@ -4,6 +4,7 @@
 #include <QStringList>
 #include <QHash>
 #include "ref_file.h"
+#include "file_type.h"
 
 class Linker
 {
@@ -18,7 +19,6 @@ public:
             const RefFile &ref) const;
 protected:
     void addFolderByFile(const QString &fileInFolderPath);
-    enum FileType {Cpp, Pro};
     static FileType typeOfFile(const QString &filePath);
     static inline bool isFolder(const QString &path);
     static inline QString parentFolder(const QString &path);

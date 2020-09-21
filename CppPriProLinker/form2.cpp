@@ -30,10 +30,19 @@ Form2::Form2(
 
     m_filesList->setFocusPolicy(Qt::NoFocus);
 
-    m_resultText2 = new TextBrowserLinks;
-    connect(m_resultText2, &TextBrowserLinks::refClicked, this, &Form2::onRefClicked);
-    layout->addWidget(m_resultText2, 1);
+    QVBoxLayout *right = new QVBoxLayout;
 
+    m_resultText2 = new TextBrowserLinks;
+    // connect(m_resultText2, &TextBrowserLinks::refHighLighted, this, &Form2::onRefHighLighted);
+    connect(m_resultText2, &TextBrowserLinks::refClicked, this, &Form2::onRefClicked);
+    right->addWidget(m_resultText2, 1);
+
+    m_refText = new QPlainTextEdit;
+    m_refText->setReadOnly(true);
+    m_refText->setFocusPolicy(Qt::NoFocus);
+    right->addWidget(m_refText);
+
+    layout->addLayout(right, 1);
 
     setCentralWidget(centralWidget);
 }
@@ -58,9 +67,18 @@ void Form2::run(const QStringList &filePathes)
         QStringList yetToParse;
         m_scanner->tryLinkRefs(yetToParse);
 
+        // stop when 0 new parsed at least once
+//        const auto newPathes = m_scanner->parsedFilePathes();
+//        if (newPathes.size() == m_parsedFiles.size())
+//            return;
+//        m_parsedFiles = newPathes;
+
         m_parsedFiles = m_scanner->parsedFilePathes();
         m_filesList->clear();
         m_filesList->addItems(m_parsedFiles);
+
+//        if (not yetToParse.isEmpty())
+//            run(yetToParse);
     }, FileScanner::InBackground);
 }
 
@@ -97,4 +115,17 @@ void Form2::onListItemSelectionChanged()
     m_resultText2->setRefs(hash.keys());
     m_resultText2->setText(s);
     m_currentFilePath = filePath;
+
+    QString refsProblems;
+    for (const RefFile &ref : hash.keys()){
+        QString s;
+        if (ref.isSystem)
+            s = ref.text + " is SYSTEM!";
+        else if (ref.text.isEmpty())
+            s = ref.text + " NOT LINKED!";
+        else
+            continue;
+        refsProblems += s + "\n";
+    }
+    m_refText->setPlainText(refsProblems);
 }

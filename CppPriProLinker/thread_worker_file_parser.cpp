@@ -36,6 +36,7 @@ void ThreadWorkerFileParser::start()
 QString ThreadWorkerFileParser::step(int i)
 {
     const QString filePath = m_pathes.at(i);
+    qDebug() << "start" << filePath;
     const QFileInfo info(filePath);
     const QString ext = info.suffix();
     FileFactory *factory = m_extToFileFactoryHash.value(ext, nullptr);

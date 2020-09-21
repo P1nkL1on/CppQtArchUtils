@@ -13,15 +13,15 @@ QString Linker::findFilePathForRef(
         const QString &refText) const
 {
     const QString folderPath = parentFolder(origFilePath);
-    const FileType type = typeOfFile(origFilePath);
-    if (type == FileType::Cpp){
+    const FileType type = fileType(origFilePath);
+    if (isCodeFormate(type)){
         QString refTextWithSlash = refText;
         if (not refTextWithSlash.startsWith('/'))
             refTextWithSlash.insert(0, '/');
         QStringList blackList;
         const QString res = findFilePathByRefEnd(folderPath, refTextWithSlash, blackList);
         return res;
-    } else if (type == FileType::Pro){
+    } else if (isProjectFormat(type)){
         QString absPath = refText;
         absPath.replace("$$PWD", "");
         if (not absPath.startsWith('/'))
@@ -58,13 +58,6 @@ void Linker::addFolderByFile(const QString &fileInFolderPath)
     if (not m_folderToFilePathesHash.contains(folderPath))
         addFolderByFile(folderPath);
     m_folderToFilePathesHash[folderPath] << fileInFolderPath;
-}
-
-Linker::FileType Linker::typeOfFile(const QString &filePath)
-{
-    if (filePath.endsWith(".pri") or filePath.endsWith(".pro"))
-        return Pro;
-    return Cpp;
 }
 
 QString Linker::findFilePathByRefEnd(

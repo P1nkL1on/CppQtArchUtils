@@ -36,10 +36,8 @@ protected:
     Linker *m_linker = nullptr;
 
     QListWidget *m_filesList = nullptr;
-    QPlainTextEdit *m_fileText = nullptr;
-    QTextBrowser *m_resultText = nullptr;
+    QPlainTextEdit *m_refText = nullptr;
     TextBrowserLinks *m_resultText2 = nullptr;
-    QPlainTextEdit *m_tokenText = nullptr;
 };
 
 #endif // FORM2_H

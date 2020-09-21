@@ -60,7 +60,7 @@ void TokenizerTests::headerCommentsMasking()
 
 void TokenizerTests::compareProTokens()
 {
-    HeaderTokenizer t(HeaderTokenizer::Pro);
+    HeaderTokenizer t(FileType::Pro);
     PlainFileData data;
     QString err;
     const bool isOk = FileIO::readPlainFileData(":/test.pro", data, err);
@@ -75,9 +75,10 @@ void TokenizerTests::compareProTokens()
     QCOMPARE(t.cachedString, epxectedData);
 }
 
-TokenizerTests::HeaderTokenizer::HeaderTokenizer(TpkenizerType type) :
-    tokenizer(type == Cpp ? Tokenizer::cppTokenizer()
-                          : Tokenizer::proTokenizer())
+TokenizerTests::HeaderTokenizer::HeaderTokenizer(FileType fileType) :
+    tokenizer(isCodeFormate(fileType) ?
+                  Tokenizer::cppTokenizer()
+                : Tokenizer::proTokenizer())
 {
 }
 

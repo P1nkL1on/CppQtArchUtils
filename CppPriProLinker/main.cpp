@@ -6,12 +6,19 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Form2 w;
-    w.showMaximized();
-    w.run("/home/alex/jff/CppQtArchUtils/CppPriProLinker",
-          "/home/alex/jff/CppQtArchUtils/CppPriProLinker",
-          {"*.h", "*.cpp", "*.pro", "*.pri"});
 
+
+    auto l = new Linker;
+    auto s = new FileScanner(l);
+    const QStringList nameFilters{"*.h", "*.cpp", "*.pro", "*.pri"};
+    const QStringList nameIgnores{"build-", "moc_", "3rdparty"};
+    Form2 w(s, l, nameFilters, nameIgnores);
+    w.showMaximized();
+    w.addLinkerLookUpFolder("/home/alex/jff");
+
+    const QStringList files = s->filePathesInDir("/home/alex/jff/CppQtArchUtils/CppPriProLinker", nameFilters, nameIgnores);
+//    const QStringList files = {"/home/alex/jff/CppQtArchUtils/CppPriProLinker/CppPriProLinker.pro"};
+    w.run(files);
     return a.exec();
 }
 
