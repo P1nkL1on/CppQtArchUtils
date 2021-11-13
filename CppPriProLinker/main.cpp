@@ -14,10 +14,10 @@ int main(int argc, char *argv[])
     const QStringList nameIgnores{"build-", "moc_", "3rdparty"};
     Form2 w(s, l, nameFilters, nameIgnores);
     w.showMaximized();
-    w.addLinkerLookUpFolder("/home/alex/jff");
+    w.addLinkerLookUpFolder("/home/alex/R3DS/");
 
-    const QStringList files = s->filePathesInDir("/home/alex/jff/CppQtArchUtils/CppPriProLinker", nameFilters, nameIgnores);
-//    const QStringList files = {"/home/alex/jff/CppQtArchUtils/CppPriProLinker/CppPriProLinker.pro"};
+//    const QStringList files = s->filePathesInDir("/home/alex/R3DS/Prohor/WTrack2/WTrack2.pro", nameFilters, nameIgnores);
+    const QStringList files = {"/home/alex/R3DS/Prohor/WTrack2/WTrackRenameDialog/WTrackRenameDialog.pri"};
     w.run(files);
     return a.exec();
 }

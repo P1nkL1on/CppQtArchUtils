@@ -67,10 +67,13 @@ void ThreadWorker::run()
     for (int i = 0; i < m_stepsTotal; ++i){
         if (not shouldSkipEachStep()){
             const QString err = step(i);
-            if (err.isEmpty())
+            if (err.isEmpty()) {
                 notifyStepProgress();
-            else
+                emit stepSuccess(i);
+            } else {
                 setStepFailed(i, err);
+                emit stepFail(i);
+            }
         }
     }
 

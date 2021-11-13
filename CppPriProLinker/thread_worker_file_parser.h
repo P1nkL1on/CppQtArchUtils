@@ -9,9 +9,9 @@ class ThreadWorkerFileParser : public ThreadWorkerInterruptable
 {
 public:
     ThreadWorkerFileParser(
-            Linker *linker,
             const QHash<QString, FileFactory *> &extToFileFactoryHash,
             const QStringList &filePathes,
+            const QStringList &lookupFilePathes,
             QObject *parent = nullptr);
     ~ThreadWorkerFileParser() override;
     QVector<File *> parsingFiles() const;

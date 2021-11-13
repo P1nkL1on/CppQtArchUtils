@@ -29,6 +29,8 @@ protected slots:
     void setStepFailed(int step, const QString &errors);
 signals:
     void finished();
+    void stepSuccess(int stedInd);
+    void stepFail(int stedInd);
     void notifySteps(int steps);
     void notifyProgress(float progress);
     void started();

@@ -1,29 +1,25 @@
 #include "thread_worker_file_parser.h"
 #include <QtDebug>
 
-ThreadWorkerFileParser::ThreadWorkerFileParser(
-        Linker *linker,
-        const QHash<QString, FileFactory *> &extToFileFactoryHash,
+ThreadWorkerFileParser::ThreadWorkerFileParser(const QHash<QString, FileFactory *> &extToFileFactoryHash,
         const QStringList &filePathes,
+        const QStringList &lookupFilePathes,
         QObject *parent) :
     ThreadWorkerInterruptable(parent),
-    m_linker(linker),
+    m_linker(new Linker),
     m_extToFileFactoryHash(extToFileFactoryHash),
     m_pathes(filePathes),
     m_count(filePathes.size())
 {
-    Q_ASSERT(linker);
     Q_ASSERT(m_count);
+    m_linker->addFilePathes(lookupFilePathes);
     setFailPolicy(FailPolicy::IfAllStepsFailed);
     setStepsTotal(m_count);
 }
 
 ThreadWorkerFileParser::~ThreadWorkerFileParser()
 {
-    // do not delete anything
-    // files are just created
-    // linker and factories are global
-    // within this context
+    delete m_linker;
 }
 
 void ThreadWorkerFileParser::start()
@@ -58,7 +54,7 @@ QString ThreadWorkerFileParser::step(int i)
 
 void ThreadWorkerFileParser::finish()
 {
-
+    qDebug() << "parsed" << m_count;
 }
 
 QStringList ThreadWorkerFileParser::pathes() const

@@ -30,21 +30,18 @@ FileScanner::~FileScanner()
         delete f;
 }
 
-QStringList FileScanner::filePathesInDir(
-        const QString &dirPath,
-        const QStringList &nameFilters,
-        const QStringList &nameIgnores) const
+QStringList FileScanner::filePathesInDir(const QString &dirPath) const
 {
     QDirIterator dirIterator(
                 dirPath,
-                nameFilters,
+                m_nameFilters,
                 QDir::Files,
                 QDirIterator::Subdirectories);
     QStringList res;
     while (dirIterator.hasNext()){
         const QString filePath = dirIterator.next();
         bool skipFile = false;
-        for (const QString &badPath : nameIgnores)
+        for (const QString &badPath : m_nameIgnores)
             if (filePath.contains(badPath)){
                 skipFile = true;
                 break;
@@ -63,6 +60,7 @@ QStringList FileScanner::parsedFilePathes() const
 
 void FileScanner::parseFiles(
         const QStringList &filePathes,
+        const QString &lookupFolder,
         ThreadUtils::foo onFinish,
         FileScanner::ParsingMode mode)
 {
@@ -135,6 +133,16 @@ bool FileScanner::isParsed(const QString &filePath) const
     return m_pathToParsedRefHash.contains(filePath);
 }
 
+void FileScanner::setNameIgnore(const QStringList &nameIgnore)
+{
+    m_nameIgnores = nameIgnore;
+}
+
+void FileScanner::setNameFilters(const QStringList &nameFilters)
+{
+    m_nameFilters = nameFilters;
+}
+
 File *FileScanner::parsedFile(const QString &filePath) const
 {
     Q_ASSERT(isParsed(filePath));
@@ -147,13 +155,15 @@ QHash<RefFile, QString> FileScanner::parsedRefHash(const QString &filePath) cons
     return m_pathToParsedRefHash.value(filePath);
 }
 
-ThreadWorker *FileScanner::createWorkerWithContext(const QStringList &filePathes)
+ThreadWorker *FileScanner::createWorkerWithContext(
+        const QStringList &filePathes,
+        const QStringList &lookupFilePathes)
 {
     Q_ASSERT(not filePathes.isEmpty());
     ThreadWorkerFileParser *worker = new ThreadWorkerFileParser(
-                m_linker,
                 m_extToFileFactoryHash,
-                filePathes);
+                filePathes,
+                lookupFilePathes);
     QObject::connect(worker, &ThreadWorker::finished, [=]{
         const QVector<File *> files = worker->files();
         const QVector<QHash<RefFile, QString>> refs = worker->refs();
@@ -171,88 +181,3 @@ ThreadWorker *FileScanner::createWorkerWithContext(const QStringList &filePathes
     });
     return worker;
 }
-//QVector<File *> FileScanner::parseDir(
-//        const QString &dir,
-//        const QStringList &fileWildCards,
-//        QWidget *dialogParent,
-//        QStringList &pathes)
-//{
-//    QStringList filePathes;
-//    QVector<File *> files;
-
-//    Linker linker;
-//    QVector<QHash<RefFile, QString>> preLinkHashes;
-
-//    ThreadWorkerLambda *worker = new ThreadWorkerLambda;
-//    worker->setFailPolicy(ThreadWorker::FailPolicy::IfAllStepsFailed);
-//    worker->setStart([&]{
-//        QDirIterator dirIterator(
-//                    dir,
-//                    fileWildCards,
-//                    QDir::Files,
-//                    QDirIterator::Subdirectories);
-//        int filesCount = 0;
-//        while (dirIterator.hasNext()){
-//            const QString filePath = dirIterator.next();
-//            if (filePath.contains("moc_") or filePath.contains("build-"))
-//                continue;
-//            filePathes << filePath;
-//            ++filesCount;
-//        }
-//        files = QVector<File *>(filesCount, nullptr);
-//        preLinkHashes = QVector<QHash<RefFile, QString>>(filesCount);
-//        worker->setStepsTotal(filesCount);
-//        linker.addFiles(filePathes);
-//    });
-//    worker->setStep([&](int i){
-//        const QString filePath = filePathes[i];
-//        const QFileInfo info(filePath);
-//        const QString ext = info.suffix();
-//        FileFactory *factory = m_extToFileFactoryHash.value(ext, nullptr);
-//        if (not factory)
-//            return QString("No factory found for %1!").arg(filePath);
-//        QString err;
-//        File *file = factory->read(filePath, err);
-//        if (not file or not err.isEmpty())
-//            return err;
-//        files[i] = file;
-
-//        // linkage
-//        const Linker::RefType refType =
-//                filePath.endsWith(".pri") or filePath.endsWith(".pro") ?
-//                    Linker::RefType::Pro: Linker::RefType::Cpp;
-//        for (const RefFile &ref : file->refs())
-//            if (not ref.isSystem){
-//                const QString refPath = linker.findFilePathForRef(filePath, ref.text, refType);
-//                if (refPath.isEmpty())
-//                    continue;
-//                preLinkHashes[i].insert(ref, refPath);
-//            }
-//        return QString();
-//    });
-//    worker->setFinish([&]{
-//        // link
-//        for (int fileInd = 0; fileInd < files.length(); ++fileInd){
-//            const QHash<RefFile, QString> &preLink = preLinkHashes[fileInd];
-//            for (const RefFile &ref : preLink.keys()){
-//                const QString filePath = preLink.value(ref);
-//                const int refFileInd = filePathes.indexOf(filePath);
-//                if (refFileInd < 0)
-//                    continue;
-//                files[fileInd]->setRef(ref, files[refFileInd]);
-//            }
-//        }
-//        qDebug() << "Finished";
-//        qDebug() << "Failed:" << worker->isFailed();
-//        qDebug() << "Errors:" << worker->valuableErrors();
-//    });
-
-
-//    ThreadHandlerDialog h(dialogParent);
-//    h.setDialogTitle("Parsing files");
-//    ThreadUtils::runOnBackground(&h, worker);
-
-//    qDebug() << "parse dir finished";
-//    pathes = filePathes;
-//    return files;
-//}

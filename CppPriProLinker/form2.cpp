@@ -8,17 +8,14 @@
 #include <QApplication>
 #include "file_io.h"
 
-Form2::Form2(
-        FileScanner *scanner,
-        Linker *linker,
+Form2::Form2(FileScanner *scanner,
         const QStringList &nameFilters,
         const QStringList &nameIgnore,
         QWidget *parent) :
     QMainWindow(parent),
     m_nameFilters(nameFilters),
     m_nameIgnore(nameIgnore),
-    m_scanner(scanner),
-    m_linker(linker)
+    m_scanner(scanner)
 {
     // layout
     QWidget *centralWidget = new QWidget;
@@ -53,17 +50,12 @@ Form2::~Form2()
 
 void Form2::addLinkerLookUpFolder(const QString &dir)
 {
-    QFileInfo info(dir);
-    Q_ASSERT(info.isDir());
-
-    const QStringList pathes = m_scanner->filePathesInDir(
-                dir, m_nameFilters, m_nameIgnore);
-    m_linker->addFilePathes(pathes);
 }
 
-void Form2::run(const QStringList &filePathes)
+void Form2::run(const QStringList &filePathes,
+                const QString &lookUpFolder)
 {
-    m_scanner->parseFiles(filePathes, [=]{
+    m_scanner->parseFiles(filePathes, lookUpFolder, [=]{
         QStringList yetToParse;
         m_scanner->tryLinkRefs(yetToParse);
 
