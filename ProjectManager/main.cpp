@@ -1,152 +1,155 @@
 #include <QCoreApplication>
-#include <QFile>
-#include <QFuture>
-#include <QFutureWatcher>
-#include <QMap>
-#include <QTemporaryFile>
-#include <QTextStream>
-#include <QVector>
-#include <QtDebug>
-#include <QtConcurrent/QtConcurrentMap>
 
-class FileTask
+#include "filetask.h"
+
+struct PriRef
 {
-public:
-    virtual void run() = 0;
+    inline bool isResolved() const
+    {
+        return id.has_value();
+    }
+    /// source code text
+    QString rawText;
+    /// parsed into the absFilePath
+    QString absFilePath;
+    /// id is nullout - no resolving was performed
+    /// id is -1 - resolved, but failed to find file, etc
+    std::optional<int> id = std::nullopt;
 };
 
-class FileTasks
+namespace Utils {
+
+template <typename T, typename Predicate>
+inline auto anyOf(const QVector<T> &vector, Predicate p)
 {
-public:
-    inline static void runFileTask(FileTask *task)
-    {
-        return task->run();
-    }
-    inline void runMultiThreaded()
-    {
-        QFuture<void> res = QtConcurrent::map(m_tasks, runFileTask);
-        QEventLoop loop;
-        QFutureWatcher<void> watcher;
-        watcher.setFuture(res);
-        QObject::connect(&watcher, &QFutureWatcher<void>::finished, &loop, &QEventLoop::quit);
-        QObject::connect(&watcher, &QFutureWatcher<void>::progressValueChanged, [](const int value) {
-            qDebug() << "Done" << value;
-        });
-        loop.exec(QEventLoop::ExcludeUserInputEvents);
-    }
-    QVector<FileTask *> m_tasks;
+    return std::any_of(vector.begin(), vector.end(), std::forward<Predicate>(p));
+}
+
+enum class ProTokenType
+{
+    None = -1,
+    Comment = 0,
+    Condition,
+    CurlyOpen,
+    CurlyClose,
+    Operator,
+    LineContinue,
+    LineBreak,
+    Identifer,
 };
 
-class FileTaskModify : public FileTask
+const QVector<QRegExp> proTokensRegExpsVector {
+    /*Comment       */ QRegExp("#[^\n]*"),
+    /*Condition     */ QRegExp("[\\w .,!:\\(\\)]+(:|(\\s*(?=\\{)))"),
+    /*CurlyOpen     */ QRegExp("\\{"),
+    /*CurlyClose    */ QRegExp("\\}"),
+    /*Operator      */ QRegExp("([-+*\\\\/=]?=)"),
+    /*LineContinue  */ QRegExp("\\\\(\\s*)\\n"),    /// when occuired "\" transition to the next line
+    /*LineBreak     */ QRegExp("((\\n)+)"),
+    /*Identifer     */ QRegExp("([a-zA-Z0-9_\\/\\$\\.\\{\\}-+=]+)"),
+};
+
+struct Token
 {
-public:
-    explicit FileTaskModify(
-            const QString &filePath,
-            const std::optional<QMap<int, QString>> &lineReplacements = std::nullopt,
-            const std::optional<QString> &newFilePath = std::nullopt) :
-        m_filePath(filePath),
-        m_newFilePath(newFilePath),
-        m_lineReplacements(lineReplacements)
+    Token() = default;
+    Token(const int pos, const int type, const QString &text) :
+        pos(pos),
+        type(type),
+        text(text)
     {
     }
-    inline void run() override
-    {
-        m_isFinishedSuccessfully = tryChangePath() && tryReplaceLines();
-    }
+    int pos = -1;
+    int type = -1;
+    QString text;
+};
 
-    /// if newFilePath set tries to rename a file
-    /// working m_filePath will be changed on success
-    inline bool tryChangePath()
-    {
-        return (!m_newFilePath.has_value() || trySetNewFilePath(*m_newFilePath));
-    }
-    /// if newFilePath set tries to rename a file to orig
-    /// working m_filePath will be set to m_filePathOrig
-    inline bool revertChangePath()
-    {
-        return (!m_newFilePath.has_value() || trySetNewFilePath(m_filePathOrig));
-    }
-    inline bool tryReplaceLines()
-    {
-        return (!m_lineReplacements.has_value() || tryReplaceLines(*m_lineReplacements));
-    }
-    inline bool revertReplaceLines()
-    {
-        return (!m_lineReplacements.has_value() || tryReplaceLines(m_linesReplaced));
-    }
-private:
-    inline bool trySetNewFilePath(const QString &path)
-    {
-        const bool isOk = QFile::rename(m_filePath, path);
-        if (isOk)
-            m_filePath = path;
-        return isOk;
-    }
-    /// warning: mem intense
-    /// opens file, reads all in buffer (changes lines, and remember
-    /// old lines into m_linesReplaced). then writes it changed
-    inline bool tryReplaceLines(const QMap<int, QString> &lineReplacements)
-    {
-        if (lineReplacements.isEmpty())
-            return true;
-        QFile file(m_filePath);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-            return false;
-        QStringList lines;
-        int nChanges = 0;
-        {
-            int lineInd = 0;
-            QTextStream in(&file);
-            while (!in.atEnd()) {
-                const QString line = in.readLine();
-                if (lineReplacements.contains(lineInd)) {
-                    ++nChanges;
-                    lines.append(lineReplacements.value(lineInd));
-                    m_linesReplaced[lineInd] = line;
-                } else {
-                    lines.append(line);
-                }
+QDebug operator<<(QDebug debug, const Token &token)
+{
+    debug << QString("%3: token %1 - %2").arg(token.type).arg(token.text).arg(token.pos);
+    return debug.space();
+}
 
-                ++lineInd;
+/// tests required, you know?
+QVector<Token> tokenize(
+        const QVector<QRegExp> &tokenRegExps,
+        const QString &fileTextJoined)
+{
+    int currentPos = 0;
+    QVector<Token> res;
+    QVector<int> cacheTokenPos(tokenRegExps.size(), -1);
+    while (currentPos < fileTextJoined.size()){
+        int nextInd= -1;
+        int minNextPos = fileTextJoined.size();
+        for (int typeInd = 0; typeInd < tokenRegExps.size(); ++typeInd){
+            const QRegExp &reg = tokenRegExps[typeInd];
+            int nextPos = cacheTokenPos[typeInd];
+            if (nextPos < currentPos){
+                nextPos = reg.indexIn(fileTextJoined, currentPos);
+                cacheTokenPos[typeInd] = nextPos;
             }
+            if (nextPos >= currentPos and nextPos < minNextPos){
+                minNextPos = nextPos;
+                nextInd = typeInd;
+            }
+            if (nextPos == currentPos)
+                break;
         }
-        file.close();
-        if (nChanges == 0)
-            return true;
-
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
-            return false;
-        {
-            QTextStream out(&file);
-            while (!lines.isEmpty())
-                out << lines.takeFirst() << "\n";
-        }
-        file.flush();
-        file.close();
-        return true;
+        if (nextInd == -1)
+            break;
+        const int length = tokenRegExps[int(nextInd)].matchedLength();
+        const QString tokenText = fileTextJoined.mid(minNextPos, length);
+        res << Token(minNextPos, nextInd, tokenText);
+        currentPos = minNextPos + length;
     }
+    return res;
+}
+
+}
+
+class Pri
+{
+public:
+    inline bool hasUnresovedRefs() const
+    {
+        return Utils::anyOf(m_refs, [](const PriRef &priRef){
+            return !priRef.isResolved();
+        });
+    }
+
+//private:
+    const int m_id = -1;
     const QString m_filePathOrig;
-    QString m_filePath;
-    std::optional<QString> m_newFilePath = std::nullopt;
-    QMap<int, QString> m_linesReplaced;
-    std::optional<QMap<int, QString>> m_lineReplacements = std::nullopt;
-    bool m_isFinishedSuccessfully = false;
+    QVector<PriRef> m_refs;
+};
+
+class PriGraph
+{
+public:
+    /// root is meant the pri, which includes will be
+    /// parsed and stored in m_pris member
+    PriGraph(const QString &absFilePathRootPri)
+    {
+
+    }
+    inline bool hasUnresovedPriRefs() const
+    {
+        return Utils::anyOf(m_pris, [](const Pri &pri){
+            return pri.hasUnresovedRefs();
+        });
+    }
+    QVector<Pri> m_pris;
 };
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-//    FileTasks ft;
 
-//    for (int i = 0; i < 40; ++i) {
-//        auto t = new FileTaskModify(
-//                    QString("/home/alex/Desktop/Test/Test1/file%1.cpp").arg(QString::number(i).rightJustified(3, '0')),
-//                    std::nullopt,
-//                    QString("/home/alex/Desktop/Test/Test2/file%1.cpp").arg(QString::number(i).rightJustified(3, '0')));
-//        ft.m_tasks << t;
-//    }
+    QFile file("/home/alex/jff/CppQtArchUtils/CppPriProLinker/CppPriProLinker.pro");
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    const QString text = file.readAll();
 
-//    ft.runMultiThreaded();
+    for (const Utils::Token &t : Utils::tokenize(Utils::proTokensRegExpsVector, text))
+        qDebug() << t;
 
     return a.exec();
 }

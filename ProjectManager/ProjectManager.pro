@@ -11,3 +11,6 @@ QMAKE_LFLAGS += -fopenmp
 
 SOURCES += \
         main.cpp
+
+HEADERS += \
+    filetask.h
